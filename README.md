@@ -1,4 +1,4 @@
-# caljs
+# caljs (working title)
 A calendar/date picker that replicates the functionality of YUI's date picker without being a giant UI library.
 
 I needed a date picker. One that would allow me to select arbitrary dates and date ranges. I have had difficulty finding
