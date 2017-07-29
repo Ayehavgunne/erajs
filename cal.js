@@ -2,27 +2,30 @@ function cal(options) {
 	let m = moment()
 	let defaults = {
 		number_of_months: 1,
+		date_format: 'YYYY-MM-DD',
 		ctrl_click: true,
 		shift_click: true,
-		current_day: m,
+		moment: m,
+		parent: null,
 		selected_dates: [],
-		on_select: function() {}
+		on_select: function () {
+		}
 	}
-	options = Object.assign(options, defaults)
-	render(options.element, m)
-	bind_clicks(options)
+	options = Object.assign(defaults, options)
+	render(options, m.clone())
+	bind_selectors(options)
+	bind_navigation(options)
 }
 
-function render(element, m) {
-	let this_m = m.clone()
-	let month_name = this_m.format('MMMM')
-	let today = this_m.date()
-	let days_in_month = this_m.endOf('month').date()
-	let first_of_month_day = this_m.startOf('month').day()
-	let days_in_last_month = this_m.subtract(1, 'months').endOf('month').date()
+function render(options, m) {
+	let month_name = m.format('MMMM')
+	let today = m.date()
+	let days_in_month = m.endOf('month').date()
+	let first_of_month_day = m.startOf('month').day()
+	let days_in_last_month = m.subtract(1, 'months').endOf('month').date()
 	let weekdays = moment.weekdaysShort()
-	this_m.add(1, 'months')
-	this_m.date(1)
+	m.add(1, 'months')
+	m.date(1)
 	let div = tag('div')
 	let tr = tag('tr')
 	let th = tag('th')
@@ -40,13 +43,13 @@ function render(element, m) {
 		for (let y = 0; y <= 6; y++) {
 			if ((x === 0 && y >= first_of_month_day) || (x > 0 && day <= days_in_month)) {
 				if (day === today) {
-					tds.push(td(div(day, {class: 'caljs-days'}), {class: 'caljs-active caljs-today'}, {date: this_m.format('YYYY-MM-DD')}))
+					tds.push(td(div(day, {class: 'caljs-days'}), {class: 'caljs-active caljs-today'}, {date: m.format('YYYY-MM-DD')}))
 				}
 				else {
-					tds.push(td(div(day, {class: 'caljs-days'}), {class: 'caljs-active'}, {date: this_m.format('YYYY-MM-DD')}))
+					tds.push(td(div(day, {class: 'caljs-days'}), {class: 'caljs-active'}, {date: m.format('YYYY-MM-DD')}))
 				}
 				day += 1
-				this_m.add(1, 'days')
+				m.add(1, 'days')
 			}
 			else {
 				if (other_day > days_in_last_month) {
@@ -59,8 +62,9 @@ function render(element, m) {
 		trs.push(tr(tds))
 	}
 	let table = tag_string('table', [tag_string('thead', tr(ths)), tag_string('tbody', trs)])
-	let cal_div = tag_string('div', [tag_string('h4', month_name), table], {class: 'caljs-cal_div'})
-	append_to_element(element, cal_div)
+	let cal_div = tag_string('div', [tag_string('h4', [div('&#9664;', {class: 'caljs-back_arrow'}), month_name, div('&#9654;', {class: 'caljs-forward_arrow'})]), table], {class: 'caljs-cal_div'})
+	append_to_element(options.element, cal_div)
+	options.parent = options.element.getElementsByClassName('caljs-cal_div').get(0)
 }
 
 function add_date(selected_dates, element) {
@@ -84,64 +88,70 @@ function remove_date(selected_dates, element) {
 	selected_dates.splice(get_value_index(selected_dates, 'date', data(element, 'date')), 1)
 }
 
-function bind_clicks(options) {
-	let cal_divs = document.getElementsByClassName('caljs-cal_div')
-	for (let cal_div of cal_divs) {
-		let tds = cal_div.querySelectorAll('td')
-		for (let td of tds) {
-			click(td, function (e) {
-				if (e.ctrlKey && options.ctrl_click) { //Control Key Held
-					if (has_class(this, 'caljs-selected_date')) { //clicking an element already selected
-						remove_date(options.selected_dates, this)
-					}
-					else { //clicking an element not yet selected
-						add_date(options.selected_dates, this)
-					}
+function bind_selectors(options) {
+	// let cal_divs = document.getElementsByClassName('caljs-cal_div')
+	// for (let cal_div of cal_divs) {
+	let tds = options.parent.querySelectorAll('td')
+	for (let td of tds) {
+		click(td, function (e) {
+			if (e.ctrlKey && options.ctrl_click) { //Control Key Held
+				if (has_class(this, 'caljs-selected_date')) { //clicking an element already selected
+					remove_date(options.selected_dates, this)
 				}
-				else if (e.shiftKey && options.shift_click) { //Shift Key Held
-					let last_clicked = get_value_index(options.selected_dates, 'last_clicked', true)
-					if (last_clicked > -1) { //a previous element has already been clicked
-						clear_selection(options.selected_dates)
-						let last_date = moment(options.selected_dates[last_clicked].date)
-						let this_date = moment(data(this, 'date'))
-						let earlierDate
-						let laterDate
-						if (last_date.isAfter(this_date)) {
-							earlierDate = this_date
-							laterDate = last_date
+				else { //clicking an element not yet selected
+					add_date(options.selected_dates, this)
+				}
+			}
+			else if (e.shiftKey && options.shift_click) { //Shift Key Held
+				let last_clicked = get_value_index(options.selected_dates, 'last_clicked', true)
+				if (last_clicked > -1) { //a previous element has already been clicked
+					let last_date = moment(options.selected_dates[last_clicked].date)
+					let this_date = moment(data(this, 'date'))
+					options.selected_dates = clear_selection()
+					let earlierDate
+					let laterDate
+					if (last_date.isAfter(this_date)) {
+						earlierDate = this_date
+						laterDate = last_date
+					}
+					else {
+						laterDate = this_date
+						earlierDate = last_date
+					}
+					let diff = laterDate.diff(earlierDate, 'days')
+					for (let x = 0; x <= diff; x++) {
+						if (earlierDate.month() === options.moment.month()) {
+							add_date(options.selected_dates, earlierDate)
+							add_class(document.querySelector('[data-date="' + earlierDate.format('YYYY-MM-DD') + '"]'), 'caljs-selected_date')
 						}
 						else {
-							laterDate = this_date
-							earlierDate = last_date
+							add_date(options.selected_dates, earlierDate)
 						}
-						let diff = laterDate.diff(earlierDate, 'days')
-						for (let x = 0; x <= diff; x++) {
-							let date_str = earlierDate.format('YYYY-MM-DD')
-							if (earlierDate.month() === options.current_day.month()) {
-								add_date(options.selected_dates, date_str)
-								add_class(document.querySelector('[data-date="' + date_str + '"]'), 'caljs-selected_date')
-							}
-							else {
-								add_date(options.selected_dates, date_str)
-							}
-							earlierDate.add(1, 'days')
-						}
-					}
-					else { //no previous last date clicked on
-						add_date(options.selected_dates, this)
+						earlierDate.add(1, 'days')
 					}
 				}
-				else { //Neither Shift Key or Control Key Held
-					clear_selection(options.selected_dates)
-					if (!has_class(this, 'selected_date')) { //clicking an element that isn't already selected
-						add_date(options.selected_dates, this)
-					}
+				else { //no previous last date clicked on
+					add_date(options.selected_dates, this)
 				}
-				// console.log(options.selected_dates)
-				options.on_select(options.selected_dates)
-			})
-		}
+			}
+			else { //Neither Shift Key or Control Key Held
+				options.selected_dates = clear_selection()
+				if (!has_class(this, 'selected_date')) { //clicking an element that isn't already selected
+					add_date(options.selected_dates, moment(data(this, 'date')))
+				}
+			}
+			let dates = []
+			for (let date of options.selected_dates) {
+				dates.push(date.date)
+			}
+			options.on_select(dates.sort())
+		})
 	}
+	// }
+}
+
+function bind_navigation(options) {
+
 }
 
 // Utility functions
@@ -274,11 +284,9 @@ function get_value_index(arr, property, value) {
 	return null
 }
 
-function clear_selection(...args) {
+function clear_selection() {
 	for (let elem of document.querySelectorAll('.caljs-selected_date')) {
 		remove_class(elem, 'caljs-selected_date')
 	}
-	for (let i of args.keys()) {
-		args[i] = []
-	}
+	return []
 }

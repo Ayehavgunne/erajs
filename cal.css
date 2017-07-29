@@ -23,8 +23,14 @@
 .caljs-cal_div td:hover .caljs-days {
 	border-bottom:2px solid #004EFF;
 }
-.caljs-active {
+.caljs-active, .caljs-back_arrow, .caljs-forward_arrow {
 	cursor:pointer;
+}
+.caljs-back_arrow {
+	float:left;
+}
+.caljs-forward_arrow {
+	float:right;
 }
 .caljs-days, .caljs-other_days {
 	padding:2px 4px;
