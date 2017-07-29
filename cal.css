@@ -1,0 +1,44 @@
+.caljs-cal_div * {
+	box-sizing:border-box;
+	user-select:none;
+}
+.caljs-cal_div {
+	background-color:#D0D0D0;
+	border:1px solid #494949;
+	float:left;
+	padding:0 15px 15px;
+}
+.caljs-cal_div table {
+	border-collapse:collapse;
+}
+.caljs-cal_div h4 {
+	text-align:center;
+	margin:8px 0;
+}
+.caljs-cal_div td {
+	padding-left:4px;
+	padding-right:4px;
+	border:1px solid #6D6D6D;
+}
+.caljs-cal_div td:hover .caljs-days {
+	border-bottom:2px solid #004EFF;
+}
+.caljs-active {
+	cursor:pointer;
+}
+.caljs-days, .caljs-other_days {
+	padding:2px 4px;
+	text-align:right;
+	width:100%;
+	height:25px;
+	line-height:21px;
+}
+.caljs-other_days {
+	color:#929292;
+}
+.caljs-today {
+	background-color:rgba(255, 255, 0, 0.25);
+}
+.caljs-selected_date {
+	background-color:rgba(0, 23, 204, 0.42);
+}
