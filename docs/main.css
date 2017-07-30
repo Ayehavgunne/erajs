@@ -342,12 +342,12 @@ table td, table th {
 table thead tr {
 	background:#F2F2F2 !important;
 }
-table tr:nth-child(odd) {
-	background:#F2F2F2;
-}
-table tr:nth-child(even) {
-	background:#D1D1D1;
-}
+/*table tr:nth-child(odd) {*/
+	/*background:#F2F2F2;*/
+/*}*/
+/*table tr:nth-child(even) {*/
+	/*background:#D1D1D1;*/
+/*}*/
 /* ------------------------------------------------------------------------
 -  Pagination. -
 -------------------------------------------------------------------------*/
