@@ -25,7 +25,7 @@ want and anyone else that wants the same thing can use it if they need to.
 ## Dependencies
 [moment.js](https://momentjs.com)
 
-##Usage
+## Usage
 ```javascript
 let container = document.getElementById('some_container') // Where the calendar will reside in HTML
 let hndl = document.getElementById('some_handle') // The element that when clicked with reveal the hidden calendar
