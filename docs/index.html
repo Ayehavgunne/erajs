@@ -15,6 +15,14 @@
 		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.js"></script>
 		<script type="text/javascript" src="https://rawgit.com/Ayehavgunne/erajs/master/era.js"></script>
 		<script type="text/javascript" src="main.js"></script>
+		<script>
+			window.onload = function() {
+				let container = document.getElementById('era_container')
+				Era({element: container, on_select: function(dates) {
+					console.log(dates.map((date) => date.format('YYYY-MM-DD')).join())
+				}})
+			}
+		</script>
 	</head>
 	<body>
 		<header id='top' class='main-header'>
@@ -32,6 +40,7 @@
 			<div class='module links color-3'>
 				<a href='https://github.com/Ayehavgunne/erajs' title='Github Repo' target='_blank'>github</a>
 			</div>
+			<div class='module color-3' style="flex: 1 1 auto" id="era_container"></div>
 		</header>
 		<div class='main-content'>
 			<article class='module color-3'>

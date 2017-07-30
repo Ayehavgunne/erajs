@@ -25,8 +25,10 @@ era.destroy()
 ## TODO
 
 - Add forward and back buttons for Year to move years at a time
+- Add more shortcuts like 'Last Month'
 - Get localization to work
 - Make a mobile friendly version
 - Add more keyboard shortcuts for navigation
 - Add more look and feel customization
 - Pretty it up... somehow
+- Add option for maintaining state?

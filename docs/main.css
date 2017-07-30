@@ -123,8 +123,9 @@ input {
 [hidden] {
 	display:none;
 }
-.top {
-	text-align:right;
+#top {
+	flex-flow:column;
+	display:flex;
 }
 .inside {
 	padding-left:15px;
@@ -251,7 +252,7 @@ article p a, article p a:visited {
 	padding:0;
 }
 /*article p a:hover {*/
-	/*border-bottom-width:2px !important;*/
+/*border-bottom-width:2px !important;*/
 /*}*/
 article p a:active {
 	background:#2C3E50;

@@ -319,6 +319,9 @@
 					settings.handle.style.cursor = 'pointer'
 				})
 			}
+			else {
+				settings.parent.style.position = 'static'
+			}
 		}
 
 		function bind_shortcuts() {
