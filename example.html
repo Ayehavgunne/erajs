@@ -10,7 +10,7 @@
 			body {
 				background-color:#505050;
 			}
-			#output {
+			#output, #output2 {
 				width:300px;
 				height:200px;
 			}
@@ -20,14 +20,27 @@
 				let cal_container = document.getElementById('cal_content')
 				let out = document.getElementById('output')
 				let handle = document.getElementById('show_cal')
-				let cal_obj = cal({element: cal_container, handle: handle, on_select: function(dates) {
+				let cal_obj = Cal({element: cal_container, handle: handle, on_select: function(dates) {
 					out.value = dates.map((date) => date.format('YYYY-MM-DD')).join(', ')
-				}, number_of_months: 2})
+				}})
 				cal_obj.set_dates([moment([2017, 6, 2]), moment([2017, 6, 5]), moment([2017, 6, 9])])
 				setTimeout(function () {
 					cal_obj.set_dates()
 				}, 1000)
 				cal_container.addEventListener('caljs-select', function (e) {
+					console.log(e.detail)
+				})
+				let cal_container2 = document.getElementById('cal_content2')
+				let out2 = document.getElementById('output2')
+				let handle2 = document.getElementById('show_cal2')
+				let cal_obj2 = Cal({element: cal_container2, handle: handle2, on_select: function(dates) {
+					out2.value = dates.map((date) => date.format('YYYY-MM-DD')).join(', ')
+				}, number_of_months: 2})
+				cal_obj2.set_dates([moment([2017, 7, 2]), moment([2017, 6, 21]), moment([2017, 7, 9])])
+				setTimeout(function () {
+					cal_obj2.set_dates()
+				}, 3000)
+				cal_container2.addEventListener('caljs-select', function (e) {
 					console.log(e.detail)
 				})
 			}
@@ -38,5 +51,9 @@
 		<br>
 		<span id="show_cal">Show Calendar</span>
 		<div id="cal_content"></div>
+		<label><textarea id="output2"></textarea></label>
+		<br>
+		<span id="show_cal2">Show Calendar</span>
+		<div id="cal_content2"></div>
 	</body>
 </html>
