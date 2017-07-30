@@ -18,14 +18,10 @@
 				vertical_offset: 0,
 				horizontal_offset: 0,
 				shortcuts: true,
-				on_select: function () {
-				},
-				on_open: function () {
-				},
-				on_close: function () {
-				},
-				on_destroy: function () {
-				},
+				on_select: function () {},
+				on_open: function () {},
+				on_close: function () {},
+				on_destroy: function () {},
 				select_event: function () {
 					let dates = get_selected_dates()
 					let evt = new CustomEvent('caljs-select', {detail: dates})
