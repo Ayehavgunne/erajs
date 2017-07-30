@@ -1,10 +1,10 @@
 (function (global, factory) {
-	global.Cal = factory()
+	global.Era = factory()
 }(window, function () {
-	function Cal(options) {
+	function Era(options) {
 		let settings = {}
 
-		function cal(options) {
+		function era(options) {
 			let m = moment()
 			let defaults = {
 				number_of_months: 1,
@@ -24,43 +24,43 @@
 				on_destroy: function () {},
 				select_event: function () {
 					let dates = get_selected_dates()
-					let evt = new CustomEvent('caljs-select', {detail: dates})
+					let evt = new CustomEvent('erajs-select', {detail: dates})
 					settings.element.dispatchEvent(evt)
 					settings.on_select(dates)
 				},
 				open_event: function () {
-					let evt = new CustomEvent('caljs-open')
+					let evt = new CustomEvent('erajs-open')
 					settings.element.dispatchEvent(evt)
 					settings.on_open()
 				},
 				close_event: function () {
-					let evt = new CustomEvent('caljs-close')
+					let evt = new CustomEvent('erajs-close')
 					settings.element.dispatchEvent(evt)
 					settings.on_close()
 				},
 				destroy_event: function () {
-					let evt = new CustomEvent('caljs-destroy')
+					let evt = new CustomEvent('erajs-destroy')
 					settings.element.dispatchEvent(evt)
 					settings.on_destroy()
 				},
 				custom_shortcuts: [],
-				class_cal: 'caljs-cal_div',
-				class_selected: 'caljs-selected_date',
-				class_active: 'caljs-active',
-				class_inactive: 'caljs-inactive',
-				class_today_highlight: 'caljs-today_highlight',
-				class_days: 'caljs-days',
-				class_back_arrow: 'caljs-back_arrow',
-				class_forward_arrow: 'caljs-forward_arrow',
-				class_shortcuts: 'caljs-shortcuts',
-				class_shortcuts_title: 'caljs-shortcuts_title',
-				class_deselect_weekends: 'caljs-deselect_weekends',
-				class_mtd: 'caljs-mtd',
-				class_today: 'caljs-today',
-				class_yesterday: 'caljs-yesterday',
-				class_this_week: 'caljs-this_week',
-				class_last_week: 'caljs-last_week',
-				class_clear: 'caljs-clear',
+				class_era: 'erajs-era_div',
+				class_selected: 'erajs-selected_date',
+				class_active: 'erajs-active',
+				class_inactive: 'erajs-inactive',
+				class_today_highlight: 'erajs-today_highlight',
+				class_days: 'erajs-days',
+				class_back_arrow: 'erajs-back_arrow',
+				class_forward_arrow: 'erajs-forward_arrow',
+				class_shortcuts: 'erajs-shortcuts',
+				class_shortcuts_title: 'erajs-shortcuts_title',
+				class_deselect_weekends: 'erajs-deselect_weekends',
+				class_mtd: 'erajs-mtd',
+				class_today: 'erajs-today',
+				class_yesterday: 'erajs-yesterday',
+				class_this_week: 'erajs-this_week',
+				class_last_week: 'erajs-last_week',
+				class_clear: 'erajs-clear',
 				back_button: '&#9664;',
 				forward_button: '&#9654;',
 			}
@@ -127,6 +127,24 @@
 						let element = settings.parent.querySelector('[data-date="' + date.format(settings.date_format) + '"]')
 						add_date(date, element)
 					}
+				},
+				change_to_month: function (month, year=moment().year()) {
+					if (is_number(month)) {
+						month = String(month + 1)
+					}
+					if (month.length === 1) {
+						month = '0' + month
+					}
+					year = String(year)
+					let year_digits = ''
+					for (let x = 0; x < year.length; x++) {
+						year_digits += 'Y'
+					}
+					settings.moment = moment(year + month, year_digits + 'MM')
+					render(settings.moment.clone())
+					bind_selectors()
+					bind_navigation(true)
+					bind_shortcuts()
 				},
 				show: function () {
 					settings.handle.style.cursor = ''
@@ -214,9 +232,9 @@
 					span('Clear', cls(settings.class_clear)),
 				], cls(settings.class_shortcuts))
 			}
-			let cal_div = div([header, ...tables, footer], cls(settings.class_cal))
-			append_to_element(settings.element, cal_div)
-			settings.parent = settings.element.getElementsByClassName(settings.class_cal).item(0)
+			let era_div = div([header, ...tables, footer], cls(settings.class_era))
+			append_to_element(settings.element, era_div)
+			settings.parent = settings.element.getElementsByClassName(settings.class_era).item(0)
 		}
 
 		function add_date(date, element = null) {
@@ -492,6 +510,10 @@
 			return val instanceof HTMLCollection
 		}
 
+		function is_number(val) {
+			return val instanceof Number
+		}
+
 		function is_object(val) {
 			if (val === null) {
 				return false
@@ -707,8 +729,8 @@
 			return []
 		}
 
-		return cal(options)
+		return era(options)
 	}
 
-	return Cal
+	return Era
 }))
