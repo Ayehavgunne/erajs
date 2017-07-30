@@ -15,8 +15,8 @@ A calendar/date picker that replicates the functionality of YUI's date picker wi
 let container = document.getElementById('some_container') // Where the calendar will reside in HTML
 let hndl = document.getElementById('some_handle') // The element that when clicked with reveal the hidden calendar
 let era = Era({element: container, handle: hndl, on_select: function(dates) {
-  //your code here
-  //dates is an array of the current selected dates as moments via moment.js
+  // your code here
+  // dates is an array of the current selected dates as moments via moment.js
 }})
 era.destroy()
 
