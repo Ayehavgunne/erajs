@@ -104,6 +104,7 @@ html, body {
 	background:#D1D1D1;
 	font:18px "Open Sans", sans-serif;
 	margin:0;
+	height:100%;
 }
 a {
 	color:#2C3E50;
@@ -145,7 +146,7 @@ nav a, nav a:visited {
 	color:#F2F2F2;
 	font-weight:400;
 	text-transform:uppercase;
-	margin:0px 5px;
+	margin:0 5px;
 }
 nav a:hover, nav a:active {
 	border-bottom-color:#F2F2F2;
@@ -214,6 +215,8 @@ nav a:active {
 	padding:0;
 	width:65%;
 	margin-top:0 !important;
+	overflow:auto;
+	height:calc(100% - 42px)
 }
 .main-content a, .main-content a:visited {
 	color:#2C3E50;
@@ -289,16 +292,18 @@ article .center {
 -  Blockquote, code, pre, tables. -
 -------------------------------------------------------------------------*/
 code, pre {
-	background:#F2F2F2;
+	background:#D4D4D4;
 	font:0.9em monospace;
 	line-height:1.2em;
-	padding:0.1em;
+	padding:0.15em;
+	border:1px solid grey;
+	border-radius:2px;
 }
 pre {
 	border-top:3px solid #CCCCCC;
 	border-bottom:1px solid #CCCCCC;
 	display:block;
-	margin:0.5em 0em;
+	margin:0.5em 0;
 	padding:0.3em 0;
 }
 blockquote {
@@ -343,10 +348,10 @@ table thead tr {
 	background:#F2F2F2 !important;
 }
 /*table tr:nth-child(odd) {*/
-	/*background:#F2F2F2;*/
+/*background:#F2F2F2;*/
 /*}*/
 /*table tr:nth-child(even) {*/
-	/*background:#D1D1D1;*/
+/*background:#D1D1D1;*/
 /*}*/
 /* ------------------------------------------------------------------------
 -  Pagination. -
@@ -465,9 +470,10 @@ table thead tr {
 	clear:both;
 	color:#888888;
 	font-size:0.7em;
-	margin:0em;
+	margin:0;
 	padding:0.2em;
 	text-align:center;
+	height:42px;
 }
 .footer a, .footer a:visited {
 	color:#7F8C8D;

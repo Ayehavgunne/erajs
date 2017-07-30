@@ -21,7 +21,7 @@
 				A calendar/date picker that replicates the functionality of YUI's date picker without being a giant UI library.
 			</div>
 			<nav class='module main-menu color-4'>
-				<a href=''>Demos</a>
+				<a href='..'>Demos</a>
 				<a href='about.html'>About</a>
 				<a href='api.html'>API</a>
 			</nav>
@@ -33,7 +33,101 @@
 			<article class="module color-3">
 				<h1>Options</h1>
 				<hr>
-				<p></p>
+				<p><code>element: HTMLElement</code> the container that the calendar is initialized into</p>
+				<p>
+					<code>handle: HTMLElement</code> the element that the calendar will be tied to when shown. Click the handle to show the calendar, click outside the calendar to close it
+				</p>
+				<p><code>number_of_months: 1</code> number of months to display</p>
+				<p>
+					<code>date_format: 'YYYY-MM-DD'</code> how the dates will be formated internally. See moment.js docs for format options. Each td element in the calendar will have a data-date attribute with the date formated from this string
+				</p>
+				<p><code>ctrl_click: true</code> turns on/off ctrl-clicking to select/deselect dates</p>
+				<p><code>shift_click: true</code> turns on/off shift-clicking to select date ranges</p>
+				<p>
+					<code>vertical_offset: 0</code> setting to vertically move the picker from the handle in pixles, negative for left and positive for right
+				</p>
+				<p>
+					<code>horizontal_offset: 0</code> setting to horizonally move the picker from the handle in pixles, positive for up and negative for down
+				</p>
+				<p><code>shortcuts: true</code> show/hide the shortcut buttons below the calendar</p>
+				<p>
+					<code>custom_shortcuts: []</code> an array of javascript objects with the properties of 'label', (html)'class' and 'callback' that will add custom shortcuts, the callback function should accept the options object and event object as parameters and return the dates to be selected. The currently selected dates will be cleared out when this function executes
+				</p>
+				<p><code>on_select: function () {}</code> callback function that is executed when selections are made
+				</p>
+				<p>
+					<code>on_open: function () {}</code> callback function that is executed when the calendar is opened/shown
+				</p>
+				<p>
+					<code>on_close: function () {}</code> callback function that is executed when the calendar is closed/hidden
+				</p>
+				<p>
+					<code>on_destroy: function () {}</code> callback function that is executed when the calendar gets destroyed
+				</p>
+				<p><code>class_cal: 'caljs-cal_div'</code> class name of the calendar container</p>
+				<p>
+					<code>class_selected: 'caljs-selected_date'</code> class name of the selected date that are viewable in the current range of the calendar
+				</p>
+				<p>
+					<code>class_active: 'caljs-active'</code> class name of the selectable dates, the dates in the currently viewable month
+				</p>
+				<p>
+					<code>class_inactive: 'caljs-inactive'</code> class name of the dates outside the currently viewable month
+				</p>
+				<p><code>class_today_highlight: 'caljs-today_highlight'</code> class name of the current date</p>
+				<p>
+					<code>class_days: 'caljs-days'</code> class name of the div inside each td representing the dates, allows the styling of the hover effect
+				</p>
+				<p><code>class_back_arrow: 'caljs-back_arrow'</code> class name of the back button</p>
+				<p><code>class_forward_arrow: 'caljs-forward_arrow'</code> class name of the forward button</p>
+				<p><code>class_shortcuts: 'caljs-shortcuts'</code> class name of the shortcuts container</p>
+				<p><code>class_shortcuts_title: 'caljs-shortcuts_title'</code> class name of the shortcuts title</p>
+				<p>
+					<code>class_deselect_weekends: 'caljs-deselect_weekends'</code> class name of the Deselect Weekends shortcut
+				</p>
+				<p><code>class_mtd: 'caljs-mtd'</code> class name of the Month to Date shortcut</p>
+				<p><code>class_today: 'caljs-today'</code> class name of the Today shortcut</p>
+				<p><code>class_yesterday: 'caljs-yesterday'</code> class name of the Yesterday shortcut</p>
+				<p><code>class_this_week: 'caljs-this_week'</code> class name of the This Week shortcut</p>
+				<p><code>class_last_week: 'caljs-last_week'</code> class name of the Last Week shortcut</p>
+				<p><code>class_clear: 'caljs-clear'</code> class name of the Clear shortcut</p>
+				<p><code>back_button: '&#9664;'</code> text of the back button</p>
+				<p><code>forward_button: '&#9654;'</code> text of the forward button</p>
+			</article>
+			<article class="module color-3">
+				<h1>Methods</h1>
+				<hr>
+				<p>
+					<code>.destroy()</code> destroys the calendar, sets things back to before the calendar was initialized
+				</p>
+				<p><code>.get_dates()</code> gets the currently selected dates, returns an array of moments</p>
+				<p>
+					<code>.set_dates(dates)</code> sets the currently selected dates clearing the current selection, pass in an array of moments or pass in nothing to clear the current selection
+				</p>
+				<p><code>.add_dates(dates)</code> add to the currently selected dates, pass in an array of moments</p>
+				<p>
+					<code>.remove_dates(dates)</code> remove from the currently selected dates, pass in an array of moments
+				</p>
+			</article>
+			<article class="module color-3">
+				<h1>Properties</h1>
+				<hr>
+				<p>
+					<code>.options</code> the current options of the calendar, changing some of the properties of the options after initialization will still effect the functionality of the calendar. Contains an array of objects as the property
+					<code>.selected_dates</code> representing the currently selected dates. The objects have two properties, a
+					<code>.date</code> property and a
+					<code>.last_clicked</code> property that is a boolean for if that was the last date clicked on</p>
+			</article>
+			<article class="module color-3">
+				<h1>Events</h1>
+				<hr>
+				<p>All handler functions should be attached to the container element (the <code>element</code> in the options) that the calendar was initialized into</p>
+				<p>
+					<code>'caljs-select'</code> event that is fired when selections on the calendar are made, event property <code>detail</code> will contain an array of the dates that are currently selected
+				</p>
+				<p><code>'caljs-open'</code> event that is fired when the calendar is opened/shown</p>
+				<p><code>'caljs-close'</code> event that is fired when the calendar is closed/hidden</p>
+				<p><code>'caljs-destroy'</code> event that is fired when the calendar is destroyed</p>
 			</article>
 		</div>
 		<div class="footer module">
