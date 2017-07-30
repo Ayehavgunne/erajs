@@ -4,11 +4,12 @@
 	font-family:Helvetica, monospace;
 }
 .caljs-cal_div {
-	background-color:#D0D0D0;
+	background-color:#EFEFEF;
 	border:1px solid #494949;
 	float:left;
 	padding:0 15px 15px;
 	position:absolute;
+	z-index:1;
 }
 .caljs-cal_div table {
 	border-collapse:collapse;
