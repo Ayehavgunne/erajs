@@ -116,56 +116,63 @@
 
 	function render(m) {
 		settings.element.innerHTML = ''
-		let month_name = m.format('MMMM')
-		let year = m.format('YYYY')
 		let today = moment()
-		let days_in_month = m.endOf('month').date()
-		let first_of_month_day = m.startOf('month').day()
-		let days_in_last_month = m.subtract(1, 'months').endOf('month').date()
-		let weekdays = moment.weekdaysShort()
-		m.add(1, 'months')
-		m.date(1)
 		let div = tag_factory('div')
 		let span = tag_factory('span')
 		let tr = tag_factory('tr')
 		let th = tag_factory('th')
 		let td = tag_factory('td')
-		let ths = []
-		let tds = []
-		let trs = []
-		let day = 1
-		let active = cls(settings.class_active)
-		let inactive_day = days_in_last_month - first_of_month_day + 1
-		for (let x = 0; x <= 6; x++) {
-			ths.push(th(weekdays[x]))
-		}
-		for (let x = 0; x < 6; x++) {
-			tds = []
-			for (let y = 0; y <= 6; y++) {
-				if ((x === 0 && y >= first_of_month_day) || (x > 0 && day <= days_in_month)) {
-					if (m.isSame(today, 'day')) {
-						tds.push(td(div(day, cls(settings.class_days, settings.class_today_highlight)), active, {date: m.format(settings.date_format)}))
+		let tables = []
+		let labels = []
+		for (let num = 0; num < settings.number_of_months; num++) {
+			let month_name = m.format('MMMM')
+			let year = m.format('YYYY')
+			let days_in_month = m.endOf('month').date()
+			let first_of_month_day = m.startOf('month').day()
+			let days_in_last_month = m.subtract(1, 'months').endOf('month').date()
+			let weekdays = moment.weekdaysShort()
+			m.add(1, 'months')
+			m.date(1)
+
+			let ths = []
+			let tds = []
+			let trs = []
+			let day = 1
+			let active = cls(settings.class_active)
+			let inactive_day = days_in_last_month - first_of_month_day + 1
+			for (let x = 0; x <= 6; x++) {
+				ths.push(th(weekdays[x]))
+			}
+			for (let x = 0; x < 6; x++) {
+				tds = []
+				for (let y = 0; y <= 6; y++) {
+					if ((x === 0 && y >= first_of_month_day) || (x > 0 && day <= days_in_month)) {
+						if (m.isSame(today, 'day')) {
+							tds.push(td(div(day, cls(settings.class_days, settings.class_today_highlight)), active, {date: m.format(settings.date_format)}))
+						}
+						else {
+							tds.push(td(div(day, cls(settings.class_days)), active, {date: m.format(settings.date_format)}))
+						}
+						day += 1
+						m.add(1, 'days')
 					}
 					else {
-						tds.push(td(div(day, cls(settings.class_days)), active, {date: m.format(settings.date_format)}))
+						if (inactive_day > days_in_last_month) {
+							inactive_day = 1
+						}
+						tds.push(td(div(inactive_day, cls(settings.class_inactive))))
+						inactive_day += 1
 					}
-					day += 1
-					m.add(1, 'days')
 				}
-				else {
-					if (inactive_day > days_in_last_month) {
-						inactive_day = 1
-					}
-					tds.push(td(div(inactive_day, cls(settings.class_inactive))))
-					inactive_day += 1
-				}
+				trs.push(tr(tds))
 			}
-			trs.push(tr(tds))
+			tables.push(tag('table', [tag('thead', tr(ths)), tag('tbody', trs)]))
+			labels.push(month_name + ' ' + year)
 		}
-		let table = tag('table', [tag('thead', tr(ths)), tag('tbody', trs)])
+
 		let header = tag('h4', [
 			div(settings.back_button, cls(settings.class_back_arrow)),
-			month_name + ' ' + year,
+			labels.join(' - '),
 			div(settings.forward_button, cls(settings.class_forward_arrow))
 		])
 		let footer = ''
@@ -181,7 +188,7 @@
 				span('Clear', cls(settings.class_clear)),
 			], cls(settings.class_shortcuts))
 		}
-		let cal_div = div([header, table, footer], cls(settings.class_cal))
+		let cal_div = div([header, ...tables, footer], cls(settings.class_cal))
 		append_to_element(settings.element, cal_div)
 		settings.parent = settings.element.getElementsByClassName(settings.class_cal).item(0)
 	}
@@ -291,6 +298,7 @@
 		})
 		click(mtd, function (e) {
 			let today = moment()
+			settings.moment = today.clone()
 			let start = moment().startOf('month')
 			if (!(e.ctrlKey && settings.ctrl_click)) {
 				settings.selected_dates = clear_selection()
@@ -308,6 +316,7 @@
 		})
 		click(today_button, function (e) {
 			let today = moment()
+			settings.moment = today.clone()
 			if (e.shiftKey && settings.shift_click) {
 				let element = settings.parent.querySelector('[data-date="' + today.format(settings.date_format) + '"]')
 				shift_click(element)
@@ -328,6 +337,7 @@
 		})
 		click(yesterday, function (e) {
 			let yest = moment().subtract(1, 'days')
+			settings.moment = yest.clone()
 			if (e.shiftKey && settings.shift_click) {
 				let element = settings.parent.querySelector('[data-date="' + yest.format(settings.date_format) + '"]')
 				shift_click(element)
@@ -348,6 +358,7 @@
 		})
 		click(this_week, function (e) {
 			let week_start = moment().startOf('week')
+			settings.moment = week_start.clone()
 			let week_end = moment().endOf('week')
 			if (!(e.ctrlKey && settings.ctrl_click)) {
 				settings.selected_dates = clear_selection()
@@ -365,6 +376,7 @@
 		})
 		click(last_week, function (e) {
 			let week_start = moment().subtract(1, 'week').startOf('week')
+			settings.moment = week_start.clone()
 			let week_end = moment().subtract(1, 'week').endOf('week')
 			if (!(e.ctrlKey && settings.ctrl_click)) {
 				settings.selected_dates = clear_selection()
@@ -397,6 +409,13 @@
 					let element = settings.parent.querySelector('[data-date="' + date.format(settings.date_format) + '"]')
 					add_date(date, element)
 				}
+				settings.moment = dates[0]
+				render(settings.moment)
+				bind_selectors()
+				bind_navigation(true)
+				bind_shortcuts()
+				change_selected()
+				settings.select_event()
 			})
 		}
 	}
@@ -428,13 +447,8 @@
 			}
 			let diff = later_date.diff(earlier_date, 'days')
 			for (let x = 0; x <= diff; x++) {
-				if (earlier_date.month() === settings.moment.month()) {
-					let element = document.querySelector('[data-date="' + earlier_date.format(settings.date_format) + '"]')
-					add_date(earlier_date.clone(), element)
-				}
-				else {
-					add_date(earlier_date.clone())
-				}
+				let element = document.querySelector('[data-date="' + earlier_date.format(settings.date_format) + '"]')
+				add_date(earlier_date.clone(), element)
 				earlier_date.add(1, 'days')
 			}
 		}

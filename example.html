@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<title>CalJs</title>
+		<link rel="stylesheet" type="text/css" href="cal.css" />
+		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.js"></script>
+		<script type="text/javascript" src="cal.js"></script>
+		<style>
+			body {
+				background-color:#505050;
+			}
+			#output {
+				width:300px;
+				height:200px;
+			}
+		</style>
+		<script>
+			window.onload = function() {
+				let cal_container = document.getElementById('cal_content')
+				let out = document.getElementById('output')
+				let handle = document.getElementById('show_cal')
+				let cal_obj = cal({element: cal_container, handle: handle, on_select: function(dates) {
+					out.value = dates.map((date) => date.format('YYYY-MM-DD')).join(', ')
+				}, number_of_months: 2})
+				cal_obj.set_dates([moment([2017, 6, 2]), moment([2017, 6, 5]), moment([2017, 6, 9])])
+				setTimeout(function () {
+					cal_obj.set_dates()
+				}, 1000)
+				cal_container.addEventListener('caljs-select', function (e) {
+					console.log(e.detail)
+				})
+			}
+		</script>
+	</head>
+	<body>
+		<label><textarea id="output"></textarea></label>
+		<br>
+		<span id="show_cal">Show Calendar</span>
+		<div id="cal_content"></div>
+	</body>
+</html>

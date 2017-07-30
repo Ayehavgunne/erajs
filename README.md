@@ -44,7 +44,7 @@ calendar.destroy()
 
 ```handle: HTMLElement``` the element that the calendar will be tied to when shown. Click the handle to show the calendar, click outside the calendar to close it
 
-```number_of_months: 1``` numer of months to display, not working yet
+```number_of_months: 1``` number of months to display
    
 ```date_format: 'YYYY-MM-DD'``` how the dates will be formated internally. See moment.js docs for format options. Each td element in the calendar will have a data-date attribute with the date formated from this string
 

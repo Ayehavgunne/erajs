@@ -12,6 +12,11 @@
 }
 .caljs-cal_div table {
 	border-collapse:collapse;
+	float:left;
+	margin-right:20px;
+}
+.caljs-cal_div table:last-of-type {
+	margin-right:0;
 }
 .caljs-cal_div h4 {
 	text-align:center;
