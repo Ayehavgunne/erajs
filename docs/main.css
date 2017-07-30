@@ -126,6 +126,7 @@ input {
 #top {
 	flex-flow:column;
 	display:flex;
+	height:calc(100% - 42px);
 }
 .inside {
 	padding-left:15px;
@@ -164,7 +165,7 @@ nav a:active {
 	font-weight:300;
 	line-height:1.7;
 	text-align:center;
-	width:35%;
+	width:500px;
 }
 .main-header h1, .main-header article h2, article .main-header h2, .main-header article h3, article .main-header h3, .main-header article h4, article .main-header h4, .main-header article h5, article .main-header h5, .main-header article h6, article .main-header h6, .main-header h2 {
 	font-size:3em;
@@ -184,6 +185,9 @@ nav a:active {
 .main-header .description {
 	color:#F2F2F2;
 }
+.description {
+	text-align:justify;
+}
 .main-header .main-menu {
 	padding:0.1em;
 	font-size:1.1em;
@@ -197,6 +201,17 @@ nav a:active {
 	font-family:'Open Sans', sans-serif;
 	padding:0.5em;
 	width:99%;
+}
+.module a.current {
+	border-bottom:2px solid white;
+}
+#dates {
+	float:right;
+	width:100px;
+	font-size:.8em;
+	height:100%;
+	overflow:auto;
+	border-left:1px solid grey;
 }
 /* ------------------------------------------------------------------------
 -  The content. -
@@ -214,7 +229,7 @@ nav a:active {
 .main-content {
 	float:right;
 	padding:0;
-	width:65%;
+	width:calc(100% - 500px);
 	margin-top:0 !important;
 	overflow:auto;
 	height:calc(100% - 42px)

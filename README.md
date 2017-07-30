@@ -1,4 +1,4 @@
-# EraJs
+# Era.js
 A calendar/date picker that replicates the functionality of YUI's date picker without being a giant UI library.
 
 [Demos!](https://ayehavgunne.github.io/erajs/)  
