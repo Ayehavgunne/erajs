@@ -1,6 +1,8 @@
 # caljs (working title)
 A calendar/date picker that replicates the functionality of YUI's date picker without being a giant UI library.
 
+---
+
 I needed a date picker. One that would allow me to select arbitrary dates and date ranges. I have had difficulty finding
 something that could do both. I did find a ton of date pickers that could select a range using two clicks on two dates
 creating a continuous range. I didn't want that because I frequently want to exclude the weekends from my selections.
@@ -19,3 +21,18 @@ build tool for selecting individual components like what JQuery UI has.
 
 I have been using YUI for a while now but I recently said this is enough! So here is a date picker that will do exactly what I
 want and anyone else that wants the same thing can use it if they need to.
+
+## Dependencies
+[moment.js](https://momentjs.com)
+
+##Usage
+```javascript
+let container = document.getElementById('some_container') // Where the calendar will reside in HTML
+let hndl = document.getElementById('some_handle') // The element that when clicked with reveal the hidden calendar
+let calendar = cal({element: container, handle: hndl, on_select: function(dates) {
+  //your code here
+  //dates is an array of the current selected dates as moments via moment.js
+}})
+calendar.destroy()
+
+```
