@@ -111,6 +111,14 @@
 					change_selected()
 					settings.select_event()
 				},
+				show: function () {
+					settings.handle.style.cursor = ''
+					settings.parent.style.display = ''
+				},
+				hide: function () {
+					settings.handle.style.cursor = 'pointer'
+					settings.parent.style.display = 'none'
+				},
 				options: settings
 			}
 		}
@@ -410,8 +418,8 @@
 						let element = settings.parent.querySelector('[data-date="' + date.format(settings.date_format) + '"]')
 						add_date(date, element)
 					}
-					settings.moment = dates[0]
-					render(settings.moment)
+					settings.moment = dates[0].clone()
+					render(dates[0].clone())
 					bind_selectors()
 					bind_navigation(true)
 					bind_shortcuts()

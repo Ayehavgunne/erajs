@@ -6,48 +6,48 @@
    v2.0 | 20110126
    License: none (public domain)
 */
-html, body, div, span, applet, object, iframe,
-h1,
-article h2,
-article h3,
-article h4,
-article h5,
-article h6, h2, h3, h4, h5, h6, p, blockquote, pre,
-a, abbr, acronym, address, big, cite, code, pre,
-del, dfn, em, img, ins, kbd, q, s, samp,
-small, strike, strong, sub, sup, tt, var,
-b, u, i, center,
-dl, dt, dd, ol, ul, li,
-fieldset, form, label, legend,
-table, caption, tbody, tfoot, thead, tr, th, td,
-article, aside, canvas, details, embed,
-figure, figcaption, footer, header, hgroup,
-menu, nav, output, ruby, section, summary,
-time, mark, audio, video {
-	margin:0;
-	padding:0;
-	border:0;
-	font:inherit;
-	vertical-align:baseline;
-}
+/*html, body, div, span, applet, object, iframe,*/
+/*h1,*/
+/*article h2,*/
+/*article h3,*/
+/*article h4,*/
+/*article h5,*/
+/*article h6, h2, h3, h4, h5, h6, p, blockquote, pre,*/
+/*a, abbr, acronym, address, big, cite, code, pre,*/
+/*del, dfn, em, img, ins, kbd, q, s, samp,*/
+/*small, strike, strong, sub, sup, tt, var,*/
+/*b, u, i, center,*/
+/*dl, dt, dd, ol, ul, li,*/
+/*fieldset, form, label, legend,*/
+/*table, caption, tbody, tfoot, thead, tr, th, td,*/
+/*article, aside, canvas, details, embed,*/
+/*figure, figcaption, footer, header, hgroup,*/
+/*menu, nav, output, ruby, section, summary,*/
+/*time, mark, audio, video {*/
+/*margin:0;*/
+/*padding:0;*/
+/*border:0;*/
+/*font:inherit;*/
+/*vertical-align:baseline;*/
+/*}*/
 /* HTML5 display-role reset for older browsers */
-article, aside, details, figcaption, figure,
-footer, header, hgroup, menu, nav, section {
-	display:block;
-}
-body {
-	line-height:1;
-}
-ol, ul {
-	list-style:none;
-}
-blockquote, q {
-	quotes:none;
-}
-table {
-	border-collapse:collapse;
-	border-spacing:0;
-}
+/*article, aside, details, figcaption, figure,*/
+/*footer, header, hgroup, menu, nav, section {*/
+/*display:block;*/
+/*}*/
+/*body {*/
+/*line-height:1;*/
+/*}*/
+/*ol, ul {*/
+/*list-style:none;*/
+/*}*/
+/*blockquote, q {*/
+/*quotes:none;*/
+/*}*/
+/*table {*/
+/*border-collapse:collapse;*/
+/*border-spacing:0;*/
+/*}*/
 /* ------------------------------------------------------------------------
 -   SASS variables.
 -------------------------------------------------------------------------*/
@@ -89,10 +89,10 @@ table {
 -  The basics. -
 -------------------------------------------------------------------------*/
 .anim, a {
-	-webkit-transition:all 0.2s ease-in;
-	-moz-transition:all 0.2s ease-in;
-	-o-transition:all 0.2s ease-in;
-	transition:all 0.2s ease-in;
+	-webkit-transition:all .4s cubic-bezier(0.74, -0.01, 0.77, 1);
+	-moz-transition:all .4s cubic-bezier(0.74, -0.01, 0.77, 1);
+	-o-transition:all .4s cubic-bezier(0.74, -0.01, 0.77, 1);
+	transition:all .4s cubic-bezier(0.74, -0.01, 0.77, 1);
 }
 html, body {
 	background:#D1D1D1;
@@ -220,10 +220,9 @@ nav a:active {
 }
 .main-content a, .main-content a:visited {
 	color:#2C3E50;
-	border-bottom:1px solid #F2F2F2;
 }
 .main-content a:hover {
-	border-color:#CCCCCC;
+	border-bottom:2px solid #A5A5A5;
 }
 .main-content a:active {
 	border-color:#333333;
@@ -233,25 +232,10 @@ nav a:active {
 	font-size:0.9em;
 	margin-right:1em;
 }
-article h1, article h2, article h3, article h4, article h5, article h6 {
+article h1 {
 	color:#333333;
 	font:700 1.6em "Open Sans", sans-serif;
 	margin:0.5em 0 !important;
-}
-article h2 {
-	font-size:1.6em;
-}
-article h3 {
-	font-size:1.5em;
-}
-article h4 {
-	font-size:1.4em;
-}
-article h5 {
-	font-size:1.3em;
-}
-article h6 {
-	font-size:1.2em;
 }
 article p {
 	font-family:"Open Sans", sans-serif;
@@ -261,14 +245,14 @@ article p {
 	text-align:justify;
 }
 article p a, article p a:visited {
-	border-bottom:1px solid #7F8C8D !important;
+	border-bottom:1px solid transparent;
 	line-height:1.7em;
 	display:inline;
 	padding:0;
 }
-article p a:hover {
-	border-bottom-width:2px !important;
-}
+/*article p a:hover {*/
+	/*border-bottom-width:2px !important;*/
+/*}*/
 article p a:active {
 	background:#2C3E50;
 	color:#F2F2F2 !important;
@@ -400,9 +384,10 @@ abbr, acronym {
 .links a, .links a:visited {
 	color:#212121;
 	text-transform:lowercase;
+	border-bottom:2px solid transparent;
 }
 .links a:hover, .links a:active {
-	text-decoration:underline !important;
+	border-bottom:2px solid #9A9A9A;
 }
 /* ------------------------------------------------------------------------
 -  Social share (end of the post). -

@@ -3,7 +3,7 @@
 	<head>
 		<meta charset="UTF-8">
 		<title>CalJs</title>
-		<link rel="stylesheet" type="text/css" href="cal.css" />
+		<link rel="stylesheet" type="text/css" href="cal.css"/>
 		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.js"></script>
 		<script type="text/javascript" src="cal.js"></script>
 		<style>
@@ -16,33 +16,28 @@
 			}
 		</style>
 		<script>
-			window.onload = function() {
+			window.onload = function () {
 				let cal_container = document.getElementById('cal_content')
 				let out = document.getElementById('output')
 				let handle = document.getElementById('show_cal')
-				let cal_obj = Cal({element: cal_container, handle: handle, on_select: function(dates) {
-					out.value = dates.map((date) => date.format('YYYY-MM-DD')).join(', ')
-				}})
-				cal_obj.set_dates([moment([2017, 6, 2]), moment([2017, 6, 5]), moment([2017, 6, 9])])
-				setTimeout(function () {
-					cal_obj.set_dates()
-				}, 1000)
-				cal_container.addEventListener('caljs-select', function (e) {
-					console.log(e.detail)
+
+				let custom_shortcut = {
+					label: 'Feb10',
+					class: 'feb10',
+					callback: function (data, e) {
+						let sel_dates = data.selected_dates // the selected dates before the click on the shortcut
+						console.log(sel_dates[0].date, sel_dates[0].last_clicked) // the two properties on the selected dates
+						console.log(e) // the click event object
+						return [moment([2017, 1, 10])] // return an array of moments
+					}
+				}
+
+				let cal_obj = Cal({
+					element: cal_container, handle: handle, on_select: function (dates) {
+						out.value = dates.map((date) => date.format('YYYY-MM-DD')).join(', ')
+					}, custom_shortcuts: [custom_shortcut]
 				})
-				let cal_container2 = document.getElementById('cal_content2')
-				let out2 = document.getElementById('output2')
-				let handle2 = document.getElementById('show_cal2')
-				let cal_obj2 = Cal({element: cal_container2, handle: handle2, on_select: function(dates) {
-					out2.value = dates.map((date) => date.format('YYYY-MM-DD')).join(', ')
-				}, number_of_months: 2})
-				cal_obj2.set_dates([moment([2017, 7, 2]), moment([2017, 6, 21]), moment([2017, 7, 9])])
-				setTimeout(function () {
-					cal_obj2.set_dates()
-				}, 3000)
-				cal_container2.addEventListener('caljs-select', function (e) {
-					console.log(e.detail)
-				})
+				cal_obj.set_dates([moment()])
 			}
 		</script>
 	</head>
@@ -51,9 +46,5 @@
 		<br>
 		<span id="show_cal">Show Calendar</span>
 		<div id="cal_content"></div>
-		<label><textarea id="output2"></textarea></label>
-		<br>
-		<span id="show_cal2">Show Calendar</span>
-		<div id="cal_content2"></div>
 	</body>
 </html>
