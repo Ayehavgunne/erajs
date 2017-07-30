@@ -111,6 +111,23 @@
 					change_selected()
 					settings.select_event()
 				},
+				set_last_clicked_date: function (date, clear_dates = false) {
+					if (clear_dates) {
+						settings.selected_dates = clear_selection()
+					}
+					let existing_date = get_value_index('date', date)
+					let last_clicked = get_value_index('last_clicked', true)
+					if (last_clicked > -1) {
+						settings.selected_dates[last_clicked].last_clicked = false
+					}
+					if (existing_date > -1) {
+						settings.selected_dates[existing_date].last_clicked = true
+					}
+					else {
+						let element = settings.parent.querySelector('[data-date="' + date.format(settings.date_format) + '"]')
+						add_date(date, element)
+					}
+				},
 				show: function () {
 					settings.handle.style.cursor = ''
 					settings.parent.style.display = ''
