@@ -14,9 +14,11 @@
 			selected_dates: [],
 			vertical_offset: 0,
 			horizontal_offset: 0,
+			shortcuts: true,
 			on_select: function () {},
 			on_open: function () {},
 			on_close: function () {},
+			on_destroy: function () {},
 			select_event: function (dates) {
 				let evt = new CustomEvent('caljs-select', {detail: dates})
 				options.element.dispatchEvent(evt)
@@ -32,16 +34,29 @@
 				options.element.dispatchEvent(evt)
 				options.on_close()
 			},
+			destroy_event: function () {
+				let evt = new CustomEvent('caljs-destroy')
+				options.element.dispatchEvent(evt)
+				options.on_destroy()
+			},
+			custom_shortcuts: [],
 			class_cal: 'caljs-cal_div',
 			class_selected: 'caljs-selected_date',
 			class_active: 'caljs-active',
 			class_inactive: 'caljs-inactive',
-			class_today: 'caljs-today',
+			class_today_highlight: 'caljs-today_highlight',
 			class_days: 'caljs-days',
 			class_back_arrow: 'caljs-back_arrow',
 			class_forward_arrow: 'caljs-forward_arrow',
-			class_deselect_weekends: 'caljs-deselect_weekends',
 			class_shortcuts: 'caljs-shortcuts',
+			class_shortcuts_title: 'caljs-shortcuts_title',
+			class_deselect_weekends: 'caljs-deselect_weekends',
+			class_mtd: 'caljs-mtd',
+			class_today: 'caljs-today',
+			class_yesterday: 'caljs-yesterday',
+			class_this_week: 'caljs-this_week',
+			class_last_week: 'caljs-last_week',
+			class_clear: 'caljs-clear',
 			back_button: '&#9664;',
 			forward_button: '&#9654;',
 		}
@@ -50,9 +65,54 @@
 		bind_selectors(options)
 		bind_navigation(options)
 		bind_shortcuts(options)
+
+		return {
+			destroy: function() {
+				options.element.innerHTML = ""
+				options.destroy_event()
+				options.handle.style.cursor = ''
+			},
+			get_dates: function () {
+				return get_selected_dates(options.selected_dates)
+			},
+			set_dates: function (dates) {
+				options.selected_dates = clear_selection(options)
+				if (dates) {
+					for (let date of dates) {
+						let selection = {date: date, last_clicked: false}
+						options.selected_dates.push(selection)
+					}
+				}
+				change_selected(options)
+				options.select_event(get_selected_dates(options.selected_dates))
+			},
+			add_dates: function (dates) {
+				for (let date of dates) {
+					let date_exists = get_value_index(options.selected_dates, 'date', date) > -1
+					if (!date_exists) {
+						let selection = {date: date, last_clicked: false}
+						options.selected_dates.push(selection)
+					}
+				}
+				change_selected(options)
+				options.select_event(get_selected_dates(options.selected_dates))
+			},
+			remove_dates: function(dates) {
+				for (let date of dates) {
+					let date_exists = get_value_index(options.selected_dates, 'date', date) > -1
+					if (date_exists) {
+						options.selected_dates.splice(get_value_index(options.selected_dates, 'date', date), 1)
+					}
+				}
+				change_selected(options)
+				options.select_event(get_selected_dates(options.selected_dates))
+			},
+			options: options
+		}
 	}
 
 	function render(options, m) {
+		options.element.innerHTML = ''
 		let month_name = m.format('MMMM')
 		let year = m.format('YYYY')
 		let today = moment()
@@ -71,7 +131,7 @@
 		let tds = []
 		let trs = []
 		let day = 1
-		let active = {class: options.class_active}
+		let active = cls(options.class_active)
 		let inactive_day = days_in_last_month - first_of_month_day + 1
 		for (let x = 0; x <= 6; x++) {
 			ths.push(th(weekdays[x]))
@@ -81,10 +141,10 @@
 			for (let y = 0; y <= 6; y++) {
 				if ((x === 0 && y >= first_of_month_day) || (x > 0 && day <= days_in_month)) {
 					if (m.isSame(today, 'day')) {
-						tds.push(td(div(day, {class: options.class_days + ' ' + options.class_today}), active, {date: m.format(options.date_format)}))
+						tds.push(td(div(day, cls(options.class_days, options.class_today_highlight)), active, {date: m.format(options.date_format)}))
 					}
 					else {
-						tds.push(td(div(day, {class: options.class_days}), active, {date: m.format(options.date_format)}))
+						tds.push(td(div(day, cls(options.class_days)), active, {date: m.format(options.date_format)}))
 					}
 					day += 1
 					m.add(1, 'days')
@@ -93,7 +153,7 @@
 					if (inactive_day > days_in_last_month) {
 						inactive_day = 1
 					}
-					tds.push(td(div(inactive_day, {class: options.class_inactive})))
+					tds.push(td(div(inactive_day, cls(options.class_inactive))))
 					inactive_day += 1
 				}
 			}
@@ -101,12 +161,24 @@
 		}
 		let table = tag('table', [tag('thead', tr(ths)), tag('tbody', trs)])
 		let header = tag('h4', [
-			div(options.back_button, {class: options.class_back_arrow}),
+			div(options.back_button, cls(options.class_back_arrow)),
 			month_name + ' ' + year,
-			div(options.forward_button, {class: options.class_forward_arrow})
+			div(options.forward_button, cls(options.class_forward_arrow))
 		])
-		let footer = div(span('Deselect Weekends', {class: options.class_deselect_weekends}), {class: options.class_shortcuts})
-		let cal_div = div([header, table, footer], {class: options.class_cal})
+		let footer = ''
+		if (options.shortcuts) {
+			footer = div([
+				div('Shortcuts', cls(options.class_shortcuts_title)),
+				span('Deselect Weekends', cls(options.class_deselect_weekends)),
+				span('MTD', cls(options.class_mtd)),
+				span('Today', cls(options.class_today)),
+				span('This Week', cls(options.class_this_week)),
+				span('Last Week', cls(options.class_last_week)),
+				span('Yesterday', cls(options.class_yesterday)),
+				span('Clear', cls(options.class_clear)),
+			], cls(options.class_shortcuts))
+		}
+		let cal_div = div([header, table, footer], cls(options.class_cal))
 		append_to_element(options.element, cal_div)
 		options.parent = options.element.getElementsByClassName(options.class_cal).item(0)
 	}
@@ -133,43 +205,10 @@
 		for (let td of tds) {
 			click(td, function (e) {
 				if (e.ctrlKey && options.ctrl_click) { //Control Key Held
-					if (has_class(this, options.class_selected)) { //clicking an element already selected
-						remove_date(options.class_selected, options.selected_dates, moment(data(this, 'date')), this)
-					}
-					else { //clicking an element not yet selected
-						add_date(options.class_selected, options.selected_dates, moment(data(this, 'date')), this)
-					}
+					ctrl_click(options, this)
 				}
 				else if (e.shiftKey && options.shift_click) { //Shift Key Held
-					let last_clicked = get_value_index(options.selected_dates, 'last_clicked', true)
-					if (last_clicked > -1) { //a previous element has already been clicked
-						let last_date = options.selected_dates[last_clicked].date
-						let this_date = moment(data(this, 'date'))
-						options.selected_dates = clear_selection(options)
-						let earlier_date
-						let later_date
-						if (last_date.isAfter(this_date)) {
-							earlier_date = this_date
-							later_date = last_date
-						}
-						else {
-							later_date = this_date
-							earlier_date = last_date
-						}
-						let diff = later_date.diff(earlier_date, 'days')
-						for (let x = 0; x <= diff; x++) {
-							if (earlier_date.month() === options.moment.month()) {
-								add_date(options.class_selected, options.selected_dates, earlier_date.clone(), document.querySelector('[data-date="' + earlier_date.format(options.date_format) + '"]'))
-							}
-							else {
-								add_date(options.class_selected, options.selected_dates, earlier_date.clone())
-							}
-							earlier_date.add(1, 'days')
-						}
-					}
-					else { //no previous last date clicked on
-						add_date(options.class_selected, options.selected_dates, moment(data(this, 'date')), this)
-					}
+					shift_click(options, this)
 				}
 				else { //Neither Shift Key or Control Key Held
 					if (!has_class(this, options.class_selected)) { //clicking an element that isn't already selected
@@ -187,19 +226,19 @@
 		let forward_button = options.parent.getElementsByClassName(options.class_forward_arrow).item(0)
 
 		click(forward_button, function () {
-			options.element.innerHTML = ''
 			options.moment = options.moment.add(1, 'months')
 			render(options, options.moment.clone())
 			bind_selectors(options)
 			bind_navigation(options, true)
+			bind_shortcuts(options)
 			change_selected(options)
 		})
 		click(back_button, function () {
-			options.element.innerHTML = ''
 			options.moment = options.moment.subtract(1, 'months')
 			render(options, options.moment.clone())
 			bind_selectors(options)
 			bind_navigation(options, true)
+			bind_shortcuts(options)
 			change_selected(options)
 		})
 		if (options.handle) {
@@ -233,6 +272,12 @@
 	function bind_shortcuts(options) {
 		let shortcut_div = options.parent.getElementsByClassName(options.class_shortcuts).item(0)
 		let deselect_weekends = shortcut_div.getElementsByClassName(options.class_deselect_weekends).item(0)
+		let mtd = shortcut_div.getElementsByClassName(options.class_mtd).item(0)
+		let today_button = shortcut_div.getElementsByClassName(options.class_today).item(0)
+		let yesterday = shortcut_div.getElementsByClassName(options.class_yesterday).item(0)
+		let this_week = shortcut_div.getElementsByClassName(options.class_this_week).item(0)
+		let last_week = shortcut_div.getElementsByClassName(options.class_last_week).item(0)
+		let clear = shortcut_div.getElementsByClassName(options.class_clear).item(0)
 		click(deselect_weekends, function () {
 			for (let key of Array.from(options.selected_dates.keys()).reverse()) {
 				let date = options.selected_dates[key].date
@@ -243,6 +288,157 @@
 			}
 			options.select_event(get_selected_dates(options.selected_dates))
 		})
+		click(mtd, function (e) {
+			let today = moment()
+			let start = moment().startOf('month')
+			if (!(e.ctrlKey && options.ctrl_click)) {
+				options.selected_dates = clear_selection(options)
+			}
+			while (start.isSameOrBefore(today, 'days')) {
+				add_date(options.class_selected, options.selected_dates, start.clone())
+				start.add(1, 'days')
+			}
+			render(options, today)
+			bind_selectors(options)
+			bind_navigation(options, true)
+			bind_shortcuts(options)
+			change_selected(options)
+			options.select_event(get_selected_dates(options.selected_dates))
+		})
+		click(today_button, function (e) {
+			let today = moment()
+			if (e.shiftKey && options.shift_click) {
+				let element = options.parent.querySelector('[data-date="' + today.format(options.date_format) + '"]')
+				shift_click(options, element)
+			}
+			else if (!(e.ctrlKey && options.ctrl_click)) {
+				options.selected_dates = clear_selection(options)
+				add_date(options.class_selected, options.selected_dates, today.clone())
+			}
+			else {
+				add_date(options.class_selected, options.selected_dates, today.clone())
+			}
+			render(options, today)
+			bind_selectors(options)
+			bind_navigation(options, true)
+			bind_shortcuts(options)
+			change_selected(options)
+			options.select_event(get_selected_dates(options.selected_dates))
+		})
+		click(yesterday, function (e) {
+			let yest = moment().subtract(1, 'days')
+			if (e.shiftKey && options.shift_click) {
+				let element = options.parent.querySelector('[data-date="' + yest.format(options.date_format) + '"]')
+				shift_click(options, element)
+			}
+			else if (!(e.ctrlKey && options.ctrl_click)) {
+				options.selected_dates = clear_selection(options)
+				add_date(options.class_selected, options.selected_dates, yest.clone())
+			}
+			else {
+				add_date(options.class_selected, options.selected_dates, yest.clone())
+			}
+			render(options, yest)
+			bind_selectors(options)
+			bind_navigation(options, true)
+			bind_shortcuts(options)
+			change_selected(options)
+			options.select_event(get_selected_dates(options.selected_dates))
+		})
+		click(this_week, function (e) {
+			let week_start = moment().startOf('week')
+			let week_end = moment().endOf('week')
+			if (!(e.ctrlKey && options.ctrl_click)) {
+				options.selected_dates = clear_selection(options)
+			}
+			while (week_start.isSameOrBefore(week_end, 'days')) {
+				add_date(options.class_selected, options.selected_dates, week_start.clone())
+				week_start.add(1, 'days')
+			}
+			render(options, moment())
+			bind_selectors(options)
+			bind_navigation(options, true)
+			bind_shortcuts(options)
+			change_selected(options)
+			options.select_event(get_selected_dates(options.selected_dates))
+		})
+		click(last_week, function (e) {
+			let week_start = moment().subtract(1, 'week').startOf('week')
+			let week_end = moment().subtract(1, 'week').endOf('week')
+			if (!(e.ctrlKey && options.ctrl_click)) {
+				options.selected_dates = clear_selection(options)
+			}
+			while (week_start.isSameOrBefore(week_end, 'days')) {
+				add_date(options.class_selected, options.selected_dates, week_start.clone())
+				week_start.add(1, 'days')
+			}
+			render(options, week_start.startOf('week'))
+			bind_selectors(options)
+			bind_navigation(options, true)
+			bind_shortcuts(options)
+			change_selected(options)
+			options.select_event(get_selected_dates(options.selected_dates))
+		})
+		click(clear, function() {
+			options.selected_dates = clear_selection(options)
+			change_selected(options)
+			options.select_event(get_selected_dates(options.selected_dates))
+		})
+		for (let shortcut of options.custom_shortcuts) {
+			let label = shortcut.label
+			let class_name = shortcut.class
+			append_to_element(shortcut_div, tag('span', label, cls(class_name)))
+			let shortcut_element = shortcut_div.getElementsByClassName(class_name).item(0)
+			click(shortcut_element, function(e) {
+				let dates = shortcut.callback(options, e)
+				options.selected_dates = clear_selection(options)
+				for (let date of dates) {
+					let element = options.parent.querySelector('[data-date="' + date.format(options.date_format) + '"]')
+					add_date(options.class_selected, options.selected_dates, date, element)
+				}
+			})
+		}
+	}
+
+	function ctrl_click(options, self) {
+		if (has_class(this, options.class_selected)) { //clicking an element already selected
+			remove_date(options.class_selected, options.selected_dates, moment(data(self, 'date')), self)
+		}
+		else { //clicking an element not yet selected
+			add_date(options.class_selected, options.selected_dates, moment(data(self, 'date')), self)
+		}
+	}
+
+	function shift_click(options, self) {
+		let last_clicked = get_value_index(options.selected_dates, 'last_clicked', true)
+		if (last_clicked > -1) { //a previous element has already been clicked
+			let last_date = options.selected_dates[last_clicked].date
+			let this_date = moment(data(self, 'date'))
+			options.selected_dates = clear_selection(options)
+			let earlier_date
+			let later_date
+			if (last_date.isAfter(this_date)) {
+				earlier_date = this_date
+				later_date = last_date
+			}
+			else {
+				later_date = this_date
+				earlier_date = last_date
+			}
+			let diff = later_date.diff(earlier_date, 'days')
+			for (let x = 0; x <= diff; x++) {
+				if (earlier_date.month() === options.moment.month()) {
+					add_date(options.class_selected, options.selected_dates, earlier_date.clone(), document.querySelector('[data-date="' + earlier_date.format(options.date_format) + '"]'))
+				}
+				else {
+					add_date(options.class_selected, options.selected_dates, earlier_date.clone())
+				}
+				earlier_date.add(1, 'days')
+			}
+		}
+		else { //no previous last date clicked on
+			add_date(options.class_selected, options.selected_dates, moment(data(self, 'date')), self)
+		}
 	}
 
 	// Utility functions
@@ -373,6 +569,10 @@
 		}
 	}
 
+	function cls(...classes) {
+		return {class: classes.join(' ')}
+	}
+
 	function append_to_element(element, str) {
 		element.insertAdjacentHTML('beforeend', str)
 		return element
@@ -457,7 +657,7 @@
 				}
 			}
 		}
-		return null
+		return -1
 	}
 
 	function clear_selection(options) {

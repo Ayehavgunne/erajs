@@ -44,9 +44,33 @@
 .caljs-inactive {
 	color:#929292;
 }
-.caljs-today {
+.caljs-today_highlight {
 	border-bottom:2px solid #FFFF00;
 }
 .caljs-selected_date {
 	background-color:rgba(0, 23, 204, 0.42);
+}
+.caljs-shortcuts {
+	padding-top:10px;
+}
+.caljs-shortcuts_title {
+	font-size:.9em;
+	padding-bottom:3px;
+}
+.caljs-shortcuts span:hover {
+	border-bottom:2px solid #004EFF;
+}
+.caljs-shortcuts span {
+	font-size:.7em;
+	cursor:pointer;
+	height:15px;
+	margin-right:8px;
+	float:left;
+	color:#0A3DE6;
+}
+.caljs-this_week {
+	clear:left;
+}
+.caljs-clear {
+	float:right !important;
 }
