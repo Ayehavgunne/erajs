@@ -2,6 +2,7 @@
 A calendar/date picker that replicates the functionality of YUI's date picker without being a giant UI library.
 
 ---
+## Tales of woe
 
 I needed a date picker. One that would allow me to select arbitrary dates and date ranges. I have had difficulty finding
 something that could do both. I did find a ton of date pickers that could select a range using two clicks on two dates
