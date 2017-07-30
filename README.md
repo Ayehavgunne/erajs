@@ -118,12 +118,12 @@ calendar.destroy()
 ```.remove_dates(dates)``` remove from the currently selected dates, pass in an array of moments
 
 ### Properties
-```.options``` the current options of the calendar, changing some of the properties of the options after initialization will still effect the functionality of the calendar  
+```.options``` the current options of the calendar, changing some of the properties of the options after initialization will still effect the functionality of the calendar. Contains an array of objects representing the currently selected dates. The objects have two properties, a ```date``` property and a ```last_clicked``` property that is a boolean for if that was the last date clicked on  
 
 ### Events
 All handler functions should be attached to the container element (the ```element``` in the options) that the calendar was initialized into
 
-```'caljs-select'``` event that is fired when selections on the calendar are made
+```'caljs-select'``` event that is fired when selections on the calendar are made, event property ```detail``` will contain an array of the dates that are currently selected
 
 ```'caljs-open'``` event that is fired when the calendar is opened/shown
 
