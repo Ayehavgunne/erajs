@@ -33,3 +33,4 @@ era.destroy()
 - Pretty it up... somehow
 - Add option for maintaining state?
 - Add options for business days, holidays?
+- Add option for open/close on hover
