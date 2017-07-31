@@ -32,3 +32,4 @@ era.destroy()
 - Add more look and feel customization
 - Pretty it up... somehow
 - Add option for maintaining state?
+- Add options for business days, holidays?
