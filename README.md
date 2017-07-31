@@ -20,7 +20,10 @@ let era = Era({element: container, handle: hndl, on_select: function(dates) {
 }})
 era.destroy()
 
-``` 
+```
+
+## Version
+0.01 - Beta
 
 ## TODO
 
