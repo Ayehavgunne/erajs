@@ -1,5 +1,5 @@
 # Era.js
-A calendar/date picker that replicates the functionality of YUI's date picker without being a giant UI library.
+A calendar/date picker that replicates the functionality of YUI's date picker without being a giant UI library (i.e. the shift-click and ctrl-click functionality allowing for multi-select/deselect).
 
 [Demos!](https://ayehavgunne.github.io/erajs/)  
 [API](https://ayehavgunne.github.io/erajs/api.html)  
@@ -34,3 +34,4 @@ era.destroy()
 - Add option for maintaining state?
 - Add options for business days, holidays?
 - Add option for open/close on hover
+- Add tooltip about using shift and control
