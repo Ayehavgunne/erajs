@@ -18,27 +18,27 @@
 				vertical_offset: 0,
 				horizontal_offset: 0,
 				shortcuts: true,
-				on_select: function () {},
-				on_open: function () {},
-				on_close: function () {},
-				on_destroy: function () {},
-				select_event: function () {
+				on_select() {},
+				on_open() {},
+				on_close() {},
+				on_destroy() {},
+				select_event() {
 					let dates = get_selected_dates()
 					let evt = new CustomEvent('erajs-select', {detail: dates})
 					settings.element.dispatchEvent(evt)
 					settings.on_select(dates)
 				},
-				open_event: function () {
+				open_event() {
 					let evt = new CustomEvent('erajs-open')
 					settings.element.dispatchEvent(evt)
 					settings.on_open()
 				},
-				close_event: function () {
+				close_event() {
 					let evt = new CustomEvent('erajs-close')
 					settings.element.dispatchEvent(evt)
 					settings.on_close()
 				},
-				destroy_event: function () {
+				destroy_event() {
 					let evt = new CustomEvent('erajs-destroy')
 					settings.element.dispatchEvent(evt)
 					settings.on_destroy()
@@ -71,15 +71,15 @@
 			bind_shortcuts()
 
 			return {
-				destroy: function () {
+				destroy() {
 					settings.element.innerHTML = ""
 					settings.destroy_event()
 					settings.handle.style.cursor = ''
 				},
-				get_dates: function () {
+				get_dates() {
 					return get_selected_dates()
 				},
-				set_dates: function (dates) {
+				set_dates(dates) {
 					settings.selected_dates = clear_selection()
 					if (dates) {
 						for (let date of dates) {
@@ -90,7 +90,7 @@
 					change_selected()
 					settings.select_event()
 				},
-				add_dates: function (dates) {
+				add_dates(dates) {
 					for (let date of dates) {
 						let date_exists = get_value_index('date', date) > -1
 						if (!date_exists) {
@@ -101,7 +101,7 @@
 					change_selected()
 					settings.select_event()
 				},
-				remove_dates: function (dates) {
+				remove_dates(dates) {
 					for (let date of dates) {
 						let date_exists = get_value_index('date', date) > -1
 						if (date_exists) {
@@ -111,7 +111,7 @@
 					change_selected()
 					settings.select_event()
 				},
-				set_last_clicked_date: function (date, clear_dates = false) {
+				set_last_clicked_date(date, clear_dates = false) {
 					if (clear_dates) {
 						settings.selected_dates = clear_selection()
 					}
@@ -128,7 +128,7 @@
 						add_date(date, element)
 					}
 				},
-				change_to_month: function (month, year=moment().year()) {
+				change_to_month(month, year = moment().year()) {
 					if (is_number(month)) {
 						month = String(month + 1)
 					}
@@ -146,11 +146,11 @@
 					bind_navigation(true)
 					bind_shortcuts()
 				},
-				show: function () {
+				show() {
 					settings.handle.style.cursor = ''
 					settings.parent.style.display = ''
 				},
-				hide: function () {
+				hide() {
 					settings.handle.style.cursor = 'pointer'
 					settings.parent.style.display = 'none'
 				},
@@ -366,7 +366,7 @@
 				settings.moment = today.clone()
 				if (e.shiftKey && settings.shift_click) {
 					let element = settings.parent.querySelector('[data-date="' + today.format(settings.date_format) + '"]')
-					shift_click(element)
+					shift_click(element, null, today)
 				}
 				else if (!(e.ctrlKey && settings.ctrl_click)) {
 					settings.selected_dates = clear_selection()
@@ -387,7 +387,7 @@
 				settings.moment = yest.clone()
 				if (e.shiftKey && settings.shift_click) {
 					let element = settings.parent.querySelector('[data-date="' + yest.format(settings.date_format) + '"]')
-					shift_click(element)
+					shift_click(element, null, yest)
 				}
 				else if (!(e.ctrlKey && settings.ctrl_click)) {
 					settings.selected_dates = clear_selection()
@@ -445,9 +445,8 @@
 				settings.select_event()
 			})
 			for (let shortcut of settings.custom_shortcuts) {
-				let label = shortcut.label
 				let class_name = shortcut.class
-				append_to_element(shortcut_div, tag('span', label, cls(class_name)))
+				append_to_element(shortcut_div, tag('span', shortcut.label, cls(class_name)))
 				let shortcut_element = shortcut_div.getElementsByClassName(class_name).item(0)
 				click(shortcut_element, function (e) {
 					let dates = shortcut.callback(settings, e)
@@ -476,11 +475,11 @@
 			}
 		}
 
-		function shift_click(self) {
+		function shift_click(self, first_date = null, second_date = null) {
 			let last_clicked = get_value_index('last_clicked', true)
 			if (last_clicked > -1) { //a previous element has already been clicked
-				let last_date = settings.selected_dates[last_clicked].date
-				let this_date = moment(data(self, 'date'))
+				let last_date = first_date ? first_date : settings.selected_dates[last_clicked].date
+				let this_date = second_date ? second_date : moment(data(self, 'date'))
 				settings.selected_dates = clear_selection()
 				let earlier_date
 				let later_date
