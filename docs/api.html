@@ -15,13 +15,13 @@
 		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.js"></script>
 		<script type="text/javascript" src="https://cdn.rawgit.com/Ayehavgunne/erajs/master/era.js"></script>
 		<script>
-			window.onload = function() {
+			window.addEventListener("load", function() {
 				let container = document.getElementById('era_container')
 				let date_container = document.getElementById('dates')
 				Era({element: container, on_select: function(dates) {
 					date_container.innerHTML = dates.map((date) => date.format('YYYY-MM-DD')).join('<br>')
 				}})
-			}
+			})
 		</script>
 	</head>
 	<body>

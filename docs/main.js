@@ -1,4 +1,4 @@
-window.onload = function() {
+window.addEventListener("load", function() {
 	let cal1 = document.getElementById('cal1')
 	let out1 = document.getElementById('output1')
 	Era({element: cal1, handle: out1, on_select: function(dates) {
@@ -27,4 +27,4 @@ window.onload = function() {
 		out3.value = dates.map((date) => date.format('YYYY-MM-DD')).join(', ')
 	}, number_of_months: 2, custom_shortcuts: [custom_shortcut]})
 	era.set_dates([moment()])
-}
+})
