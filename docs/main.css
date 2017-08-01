@@ -124,8 +124,8 @@ input {
 	display:none;
 }
 #top {
-	flex-flow:column;
-	display:flex;
+	/*flex-flow:column;*/
+	/*display:flex;*/
 	height:calc(100% - 42px);
 }
 .inside {
