@@ -38,3 +38,4 @@ era.destroy()
 - Add options for business days, holidays?
 - Add option for open/close on hover
 - Add tooltip about using shift and control
+- Ctrl-Click the back or forward arrows will add entire months to selection
