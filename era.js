@@ -375,8 +375,7 @@
 						year -= 1
 						return
 					}
-					year_select.value = year
-					change_year(year)
+					change_year(year, year_select)
 					highlight_current_month(year)
 				}
 				change_selected()
@@ -397,15 +396,14 @@
 						year += 1
 						return
 					}
-					year_select.value = year
-					change_year(year)
+					change_year(year, year_select)
 					highlight_current_month(year)
 				}
 				change_selected()
 			})
 			if (year_select && settings.calendar_type === 'months') {
 				add_event(year_select, 'change', function() {
-					let year = year_select.options[year_select.selectedIndex].value
+					let year = parseInt(year_select.options[year_select.selectedIndex].value)
 					change_year(year)
 					change_selected()
 					highlight_current_month(year)
@@ -451,6 +449,8 @@
 			let this_week = shortcut_div.getElementsByClassName(settings.class_this_week).item(0)
 			let last_week = shortcut_div.getElementsByClassName(settings.class_last_week).item(0)
 			let clear = shortcut_div.getElementsByClassName(settings.class_clear).item(0)
+			let current_month = shortcut_div.getElementsByClassName(settings.class_current_month).item(0)
+
 			if (deselect_weekends) {
 				click(deselect_weekends, function() {
 					for (let key of Array.from(settings.selected_dates.keys()).reverse()) {
@@ -485,7 +485,7 @@
 			}
 			if (today_button) {
 				click(today_button, function(e) {
-					let today = moment()
+					let today = settings.today
 					settings.moment = today.clone()
 					if (e.shiftKey && settings.shift_click) {
 						let element = settings.parent.querySelector('[data-date="' + today.format(settings.date_format) + '"]')
@@ -576,6 +576,26 @@
 					settings.select_event()
 				})
 			}
+			if (current_month) {
+				click(current_month, function(e) {
+					let today = settings.today.clone().startOf('month')
+					if (e.shiftKey && settings.shift_click) {
+						let element = settings.parent.querySelector('[data-date="' + today.format(settings.date_format) + '"]')
+						shift_click(element, null, today)
+					}
+					else if (!(e.ctrlKey && settings.ctrl_click)) {
+						settings.selected_dates = clear_selection()
+						add_date(today.clone())
+					}
+					else {
+						add_date(today.clone())
+					}
+					change_year(today.year())
+					change_selected()
+					highlight_current_month(today.year())
+					settings.select_event()
+				})
+			}
 			for (let shortcut of settings.custom_shortcuts) {
 				let class_name = shortcut.class
 				append_to_element(shortcut_div, tag('span', shortcut.label, cls(class_name)))
@@ -598,8 +618,12 @@
 			}
 		}
 
-		function change_year(year) {
+		function change_year(year, year_select = null) {
+			if (!year_select) {
+				year_select = settings.parent.getElementsByClassName(settings.class_year_select).item(0)
+			}
 			let tds = settings.parent.getElementsByClassName(settings.class_active)
+			year_select.value = year
 			for (let td of tds) {
 				data(td, 'date', moment(data(td, 'date'), settings.date_format).year(year).format(settings.date_format))
 			}
@@ -895,334 +919,3 @@
 
 	return Era
 }))
-
-// (function() {
-// 	let yesterday = new Date()
-// 	yesterday.setDate(yesterday.getDate() - 1)
-// 	$.each($('#monthTable').find('td'), function() {
-// 		$(this).disableSelection()
-// 	})
-// 	$.each($('#quarterTable').find('td'), function() {
-// 		$(this).disableSelection()
-// 	})
-// 	let selectedMonths
-// 	let selectedQuarters
-//
-// 	$('#monthView').unbind('click').click(function() {
-// 		$('#mtdLabel').show()
-// 		$('#date_handle').hide()
-// 		$('.selectedMonth').removeClass('selectedMonth')
-// 		selectedMonths = [{
-// 			date: (zeroPad(yesterday.getMonth() + 1)) + '-' + yesterday.getFullYear(),
-// 			lastClicked: false
-// 		}]
-// 		$('[data-month="' + zeroPad(yesterday.getMonth() + 1) + '"]').addClass('selectedMonth')
-// 		$('#dates_output').val(selectedMonths[0].date)
-// 		$('#yearSelect option[value="' + yesterday.getFullYear() + '"]').prop('selected', true)
-// 		$('.dateViewSelected').removeClass('dateViewSelected')
-// 		$('#monthView').addClass('dateViewSelected')
-// 		$('#dateGroup').hide()
-// 		$('#monthGroup').show()
-// 		$('#quarterGroup').hide()
-// 		$('#viewSelector').text('View: Months')
-// 		$('#prevYear').unbind('click').click(function() {
-// 			if (!$('#yearSelect option:selected').is(':first-child')) {
-// 				$('#yearSelect option:selected').removeAttr('selected').prev('option').prop('selected', true)
-// 				changeSelected('month')
-// 			}
-// 		}).disableSelection()
-// 		$('#nextYear').unbind('click').click(function() {
-// 			if (!$('#yearSelect option:selected').is(':last-child')) {
-// 				$('#yearSelect option:selected').removeAttr('selected').next('option').prop('selected', true)
-// 				changeSelected('month')
-// 			}
-// 		}).disableSelection()
-// 		$('#monthTable td').unbind('click').click(function(e) {
-// 			if (e.ctrlKey && !$('#monthView').hasClass('noCtrl')) { //Control Key Held
-// 				if ($(this).hasClass('selectedMonth')) { //clicking an element already selected
-// 					removeMonth($(this))
-// 				}
-// 				else { //clicking an element not yet selected
-// 					addMonth($(this).data('month'), $('#yearSelect option:selected').text(), $(this))
-// 				}
-// 			}
-// 			else if (e.shiftKey && !$('#monthView').hasClass('noShift')) { //Shift Key Held
-// 				let lastClicked = getValueIndex(selectedMonths, 'lastClicked', true)
-// 				if (lastClicked > -1) { //a previous element has already been clicked
-// 					let lastDate = selectedMonths[lastClicked].date.split('-')
-// 					let thisDate = [$(this).data('month'), $('#yearSelect option:selected').text()]
-// 					clearSelection()
-// 					let earlierDate
-// 					let laterDate
-// 					if (new Date(lastDate[1], lastDate[0]) > new Date(thisDate[1], thisDate[0])) {
-// 						earlierDate = new Date(thisDate[1], thisDate[0] - 1)
-// 						laterDate = new Date(lastDate[1], lastDate[0] - 1)
-// 					}
-// 					else {
-// 						laterDate = new Date(thisDate[1], thisDate[0] - 1)
-// 						earlierDate = new Date(lastDate[1], lastDate[0] - 1)
-// 					}
-// 					let diff = monthDiff(earlierDate, laterDate)
-// 					for (let x = 0; x <= diff + 1; x++) {
-// 						let nextMonth = earlierDate.getMonth() + 1
-// 						nextMonth = zeroPad(nextMonth)
-// 						if (earlierDate.getFullYear() + '' === $('#yearSelect option:selected').text()) {
-// 							addMonth(nextMonth, earlierDate.getFullYear(), $('[data-month="' + nextMonth + '"]'))
-// 						}
-// 						else {
-// 							addMonth(nextMonth, earlierDate.getFullYear())
-// 						}
-// 						earlierDate.setMonth(parseInt(nextMonth, 10))
-// 					}
-// 				}
-// 				else { //no previous last month clicked on
-// 					addMonth($(this).data('month'), $('#yearSelect option:selected').text(), $(this))
-// 				}
-// 			}
-// 			else { //Not Shift Key nor Control Key Held
-// 				clearSelection()
-// 				if (!$(this).hasClass('selectedMonth')) { //clicking an element that isn't already selected
-// 					addMonth($(this).data('month'), $('#yearSelect option:selected').text(), $(this))
-// 				}
-// 			}
-// 			$('#dates_output').val('')
-// 			let dates_output = ''
-// 			selectedMonths.sort(function(x, y) {
-// 				let date1 = x.date.split('-')
-// 				let date2 = y.date.split('-')
-// 				if (new Date(date1[1], date1[0]) < new Date(date2[1], date2[0])) {
-// 					return -1
-// 				}
-// 				if (new Date(date1[1], date1[0]) > new Date(date2[1], date2[0])) {
-// 					return 1
-// 				}
-// 				return 0
-// 			})
-// 			for (let y = 0; y < selectedMonths.length; y++) {
-// 				dates_output += selectedMonths[y].date + ', '
-// 			}
-// 			$('#dates_output').val(dates_output.slice(0, -2))
-// 		})
-//
-// 		function addMonth(month, year, element) {
-// 			if (element) {
-// 				element.addClass('selectedMonth')
-// 			}
-// 			let dateString = month + '-' + year
-// 			for (let i = 0; i < selectedMonths.length; i++) {
-// 				selectedMonths[i].lastClicked = false
-// 			}
-// 			selectedMonths.push({date: dateString, lastClicked: true})
-// 			return dateString
-// 		}
-//
-// 		function removeMonth(element) {
-// 			element.removeClass('selectedMonth')
-// 			selectedMonths.splice(getValueIndex(selectedMonths, 'date', element.data('month')), 1)
-// 		}
-//
-// 		function monthDiff(d1, d2) {
-// 			let months
-// 			months = (d2.getFullYear() - d1.getFullYear()) * 12
-// 			months -= d1.getMonth() + 1
-// 			months += d2.getMonth()
-// 			return months <= 0 ? 0 : months
-// 		}
-//
-// 		$('#yearSelect').change(function() {
-// 			changeSelected('month')
-// 		})
-// 	}).disableSelection()
-//
-// 	$('#dayView').unbind('click').click(function() {
-// 		$('#mtdLabel').hide()
-// 		$('#viewSelector').text('View: Days')
-// 		$('#monthGroup').hide()
-// 		$('#quarterGroup').hide()
-// 		$('#date_handle').show()
-// 		era.set_dates([moment().subtract(1, 'days')])
-// 		$('.dateViewSelected').removeClass('dateViewSelected')
-// 		$('#dayView').addClass('dateViewSelected')
-// 	}).disableSelection()
-//
-// 	$('#quarterView').unbind('click').click(function() {
-// 		$('.selectedQuarter').removeClass('selectedQuarter')
-// 		selectedQuarters = [{
-// 			date: ("Q" + yesterday.getQuarter()) + ' ' + yesterday.getFullYear(),
-// 			lastClicked: false
-// 		}]
-// 		$('[data-quarter="' + yesterday.getQuarter() + '"]').addClass('selectedQuarter')
-// 		$('#dates_output').val(selectedQuarters[0].date)
-// 		$('#quarterYearSelect option[value="' + yesterday.getFullYear() + '"]').prop('selected', true)
-// 		$('#viewSelector').text('View: Quarters')
-// 		$('#monthGroup').hide()
-// 		$('#quarterGroup').show()
-// 		$('#date_handle').hide()
-// 		$('.dateViewSelected').removeClass('dateViewSelected')
-// 		$('#quarterView').addClass('dateViewSelected')
-// 		$('#prevQuarterYear').unbind('click').click(function() {
-// 			if (!$('#quarterYearSelect option:selected').is(':first-child')) {
-// 				$('#quarterYearSelect option:selected').removeAttr('selected').prev('option').prop('selected', true)
-// 				changeSelected('quarter')
-// 			}
-// 		}).disableSelection()
-// 		$('#nextQuarterYear').unbind('click').click(function() {
-// 			if (!$('#quarterYearSelect option:selected').is(':last-child')) {
-// 				$('#quarterYearSelect option:selected').removeAttr('selected').next('option').prop('selected', true)
-// 				changeSelected('quarter')
-// 			}
-// 		}).disableSelection()
-// 		$('#quarterTable td').unbind('click').click(function(e) {
-// 			if (e.ctrlKey && !$('#quarterView').hasClass('noCtrl')) { //Control Key Held
-// 				if ($(this).hasClass('selectedQuarter')) { //clicking an element already selected
-// 					removeQuarter($(this))
-// 				}
-// 				else { //clicking an element not yet selected
-// 					addQuarter($(this).data('quarter'), $('#quarterYearSelect option:selected').text(), $(this))
-// 				}
-// 			}
-// 			else if (e.shiftKey && !$('#quarterView').hasClass('noShift')) { //Shift Key Held
-// 				let lastClicked = getValueIndex(selectedQuarters, 'lastClicked', true)
-// 				if (lastClicked > -1) { //a previous element has already been clicked
-// 					let lastDate = selectedQuarters[lastClicked].date.replace('Q', '').split(' ')
-// 					let thisDate = [$(this).data('quarter') + '', $('#quarterYearSelect option:selected').text()]
-// 					clearSelection()
-// 					let earlierDate
-// 					let laterDate
-// 					if (new Date(lastDate[1], lastDate[0] * 3 - 1) > new Date(thisDate[1], thisDate[0] * 3 - 1)) {
-// 						earlierDate = new Date(thisDate[1], thisDate[0] * 3 - 1)
-// 						laterDate = new Date(lastDate[1], lastDate[0] * 3 - 1)
-// 					}
-// 					else {
-// 						laterDate = new Date(thisDate[1], thisDate[0] * 3 - 1)
-// 						earlierDate = new Date(lastDate[1], lastDate[0] * 3 - 1)
-// 					}
-// 					let diff = quarterDiff(earlierDate, laterDate)
-// 					for (let x = 0; x <= diff; x++) {
-// 						let nextQuarter = earlierDate.getQuarter() + 1
-// 						let thisQuarter = earlierDate.getQuarter()
-// 						if (earlierDate.getFullYear() + '' === $('#quarterYearSelect option:selected').text()) {
-// 							addQuarter(thisQuarter, earlierDate.getFullYear(), $('[data-quarter="' + thisQuarter + '"]'))
-// 						}
-// 						else {
-// 							addQuarter(thisQuarter, earlierDate.getFullYear())
-// 						}
-// 						earlierDate.setQuarter(parseInt(nextQuarter, 10))
-// 					}
-// 				}
-// 				else { //no previous last quarter clicked on
-// 					addQuarter($(this).data('quarter'), $('#quarterYearSelect option:selected').text(), $(this))
-// 				}
-// 			}
-// 			else { //Not Shift Key nor Control Key Held
-// 				clearSelection()
-// 				if (!$(this).hasClass('selectedQuarter')) { //clicking an element that isn't already selected
-// 					addQuarter($(this).data('quarter'), $('#quarterYearSelect option:selected').text(), $(this))
-// 				}
-// 			}
-// 			$('#dates_output').val('')
-// 			let dates_output = ''
-// 			selectedQuarters.sort(function(x, y) {
-// 				let date1 = x.date.split('-')
-// 				let date2 = y.date.split('-')
-// 				if (new Date(date1[1], date1[0]) < new Date(date2[1], date2[0])) {
-// 					return -1
-// 				}
-// 				if (new Date(date1[1], date1[0]) > new Date(date2[1], date2[0])) {
-// 					return 1
-// 				}
-// 				return 0
-// 			})
-// 			for (let y = 0; y < selectedQuarters.length; y++) {
-// 				dates_output += selectedQuarters[y].date + ', '
-// 			}
-// 			$('#dates_output').val(dates_output.slice(0, -2))
-//
-// 			function addQuarter(quarter, year, element) {
-// 				if (element) {
-// 					element.addClass('selectedQuarter')
-// 				}
-// 				let dateString = 'Q' + quarter + ' ' + year
-// 				for (let i = 0; i < selectedQuarters.length; i++) {
-// 					selectedQuarters[i].lastClicked = false
-// 				}
-// 				selectedQuarters.push({date: dateString, lastClicked: true})
-// 				return dateString
-// 			}
-//
-// 			function removeQuarter(element) {
-// 				element.removeClass('selectedQuarter')
-// 				selectedQuarters.splice(getValueIndex(selectedQuarters, 'date', element.data('quarter')), 1)
-// 			}
-//
-// 			function quarterDiff(d1, d2) {
-// 				let quarters
-// 				quarters = (d2.getFullYear() - d1.getFullYear()) * 4
-// 				quarters -= d1.getQuarter()
-// 				quarters += d2.getQuarter()
-// 				return quarters <= 0 ? 0 : quarters
-// 			}
-//
-// 			$('#quarterYearSelect').change(function() {
-// 				changeSelected('quarter')
-// 			})
-// 		})
-// 	}).disableSelection()
-//
-// 	function changeSelected(type) {
-// 		let x = 0
-// 		let thisDate
-// 		if (type === 'month') {
-// 			$('.selectedMonth').removeClass('selectedMonth')
-// 			for (x = 0; x < selectedMonths.length; x++) {
-// 				thisDate = selectedMonths[x].date.split('-')
-// 				if (thisDate[1] === $('#yearSelect option:selected').text()) {
-// 					$('[data-month="' + thisDate[0] + '"]').addClass('selectedMonth')
-// 				}
-// 			}
-// 		}
-// 		else if (type === 'quarter') {
-// 			$('.selectedQuarter').removeClass('selectedQuarter')
-// 			for (x = 0; x < selectedQuarters.length; x++) {
-// 				thisDate = selectedQuarters[x].date.replace('Q', '').split(' ')
-// 				if (thisDate[1] === $('#quarterYearSelect option:selected').text()) {
-// 					$('[data-quarter="' + thisDate[0] + '"]').addClass('selectedQuarter')
-// 				}
-// 			}
-// 		}
-// 	}
-//
-// 	function getValueIndex(arr, property, value) {
-// 		for (let i = 0; i < arr.length; i++) {
-// 			if (arr[i][property] === value) return i
-// 		}
-// 		return null
-// 	}
-//
-// 	$('#tableClear').unbind('click').click(function() {
-// 		clearFields()
-// 		clearSelection()
-// 	}).disableSelection()
-//
-// 	$('#filterClear').unbind('click').click(function() {
-// 		let filters = [], $t = $(this), col = $t.data('filter-column')
-// 		filters[col] = $t.data('filter-text') || $t.text()
-// 		return false
-// 	}).disableSelection()
-//
-// 	function clearSelection() {
-// 		$('.selectedMonth').removeClass('selectedMonth')
-// 		selectedMonths = []
-// 		$('.selectedQuarter').removeClass('selectedQuarter')
-// 		selectedQuarters = []
-// 	}
-//
-// 	function clearFields() {
-// 		$('.selectedOption').removeClass('selectedOption')
-// 		$('.highlightedOption').removeClass('highlightedOption')
-// 		$('#dates_output').val('')
-// 		$('#headerFields').html('')
-// 		$('#headerSps').html('')
-// 		$('#headerAgents').val('')
-// 	}
-// })
