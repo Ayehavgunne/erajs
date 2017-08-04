@@ -12,6 +12,7 @@
 				date_format: 'YYYY-MM-DD',
 				ctrl_click: true,
 				shift_click: true,
+				today: m.clone(),
 				moment: m,
 				parent: null,
 				handle: null,
@@ -65,6 +66,8 @@
 				class_last_week: 'erajs-last_week',
 				class_current_month: 'erajs-current_month',
 				class_clear: 'erajs-clear',
+				class_month: 'erajs-month',
+				class_year_select: 'erajs-year_select',
 				back_button: '&#9664;',
 				forward_button: '&#9654;',
 			}
@@ -167,7 +170,7 @@
 				render_days(m)
 			}
 			else if (settings.calendar_type === 'months') {
-				render_months(m)
+				render_months(m.startOf('month'))
 			}
 			else if (settings.calendar_type === 'quarters') {
 				render_quarters(m)
@@ -176,12 +179,13 @@
 
 		function render_days(m) {
 			settings.element.innerHTML = ''
-			let today = moment()
+			// let today = moment()
 			let div = tag_factory('div')
 			let span = tag_factory('span')
 			let tr = tag_factory('tr')
 			let th = tag_factory('th')
 			let td = tag_factory('td')
+			let active = cls(settings.class_active)
 			let tables = []
 			let labels = []
 			for (let num = 0; num < settings.number_of_months; num++) {
@@ -198,7 +202,6 @@
 				let tds = []
 				let trs = []
 				let day = 1
-				let active = cls(settings.class_active)
 				let inactive_day = days_in_last_month - first_of_month_day + 1
 				for (let x = 0; x <= 6; x++) {
 					ths.push(th(weekdays[x]))
@@ -207,7 +210,7 @@
 					tds = []
 					for (let y = 0; y <= 6; y++) {
 						if ((x === 0 && y >= first_of_month_day) || (x > 0 && day <= days_in_month)) {
-							if (m.isSame(today, 'day')) {
+							if (m.isSame(settings.today, 'day')) {
 								tds.push(td(div(day, cls(settings.class_days, settings.class_today_highlight)), active, {date: m.format(settings.date_format)}))
 							}
 							else {
@@ -255,33 +258,50 @@
 
 		function render_months(m) {
 			settings.element.innerHTML = ''
-			let today = moment()
 			let div = tag_factory('div')
 			let span = tag_factory('span')
 			let tr = tag_factory('tr')
 			let td = tag_factory('td')
 			let option = tag_factory('option')
+			let active = cls(settings.class_active)
 			let years = []
+			let year = settings.year_dropdown_before.clone()
 			let month_names = moment.monthsShort()
-			while (settings.year_dropdown_before.isSameOrBefore(settings.year_dropdown_after)) {
-				if (settings.year_dropdown_before.year() === today.year()) {
-					years.push(option(settings.year_dropdown_before.format('YYYY'), {selected: null}))
+			while (year.isSameOrBefore(settings.year_dropdown_after)) {
+				if (year.year() === m.year()) {
+					years.push(option(year.format('YYYY'), {selected: null}))
 				}
 				else {
-					years.push(option(settings.year_dropdown_before.format('YYYY')))
+					years.push(option(year.format('YYYY')))
 				}
-				settings.year_dropdown_before.add(1, 'years')
+				year.add(1, 'years')
 			}
 			let header = tag('h4', [
 				span(settings.back_button, cls(settings.class_back_arrow)),
-				tag('label', 'Year', {for: 'year_select'}),
-				tag('select', years)
+				tag('label', ['Year', tag('select', years, cls(settings.class_year_select))]),
+				span(settings.forward_button, cls(settings.class_forward_arrow))
 			])
 			let table = tag('table', tag('tbody', [
-				tr([td(month_names[0]), td(month_names[1]), td(month_names[2])]),
-				tr([td(month_names[3]), td(month_names[4]), td(month_names[5])]),
-				tr([td(month_names[6]), td(month_names[7]), td(month_names[8])]),
-				tr([td(month_names[9]), td(month_names[10]), td(month_names[11])])
+				tr([
+					td(div(month_names[0], cls(settings.class_month)), active, {date: m.startOf('year').format(settings.date_format)}),
+					td(div(month_names[1], cls(settings.class_month)), active, {date: m.add(1, 'months').format(settings.date_format)}),
+					td(div(month_names[2], cls(settings.class_month)), active, {date: m.add(1, 'months').format(settings.date_format)})
+				]),
+				tr([
+					td(div(month_names[3], cls(settings.class_month)), active, {date: m.add(1, 'months').format(settings.date_format)}),
+					td(div(month_names[4], cls(settings.class_month)), active, {date: m.add(1, 'months').format(settings.date_format)}),
+					td(div(month_names[5], cls(settings.class_month)), active, {date: m.add(1, 'months').format(settings.date_format)})
+				]),
+				tr([
+					td(div(month_names[6], cls(settings.class_month)), active, {date: m.add(1, 'months').format(settings.date_format)}),
+					td(div(month_names[7], cls(settings.class_month)), active, {date: m.add(1, 'months').format(settings.date_format)}),
+					td(div(month_names[8], cls(settings.class_month)), active, {date: m.add(1, 'months').format(settings.date_format)})
+				]),
+				tr([
+					td(div(month_names[9], cls(settings.class_month)), active, {date: m.add(1, 'months').format(settings.date_format)}),
+					td(div(month_names[10], cls(settings.class_month)), active, {date: m.add(1, 'months').format(settings.date_format)}),
+					td(div(month_names[11], cls(settings.class_month)), active, {date: m.add(1, 'months').format(settings.date_format)})
+				])
 			]))
 			let footer = div([
 				div('Shortcuts', cls(settings.class_shortcuts_title)),
@@ -290,6 +310,8 @@
 			], cls(settings.class_shortcuts))
 			let era_div = div([header, table, footer], cls(settings.class_era))
 			append_to_element(settings.element, era_div)
+			settings.parent = settings.element.getElementsByClassName(settings.class_era).item(0)
+			add_class(settings.parent.querySelector('[data-date="' + moment().startOf('month').format(settings.date_format) + '"] div'), settings.class_today_highlight)
 		}
 
 		function render_quarters(m) {
@@ -314,7 +336,7 @@
 		}
 
 		function bind_selectors() {
-			let tds = settings.parent.querySelectorAll('.' + settings.class_active)
+			let tds = settings.parent.getElementsByClassName(settings.class_active)
 			for (let td of tds) {
 				click(td, function(e) {
 					if (e.ctrlKey && settings.ctrl_click) {
@@ -335,23 +357,60 @@
 		function bind_navigation(handle_bound = false) {
 			let back_button = settings.parent.getElementsByClassName(settings.class_back_arrow).item(0)
 			let forward_button = settings.parent.getElementsByClassName(settings.class_forward_arrow).item(0)
+			let year_select = settings.parent.getElementsByClassName(settings.class_year_select).item(0)
 
 			click(forward_button, function() {
-				settings.moment = settings.moment.add(1, 'months')
-				render(settings.moment.clone())
-				bind_selectors()
-				bind_navigation(true)
-				bind_shortcuts()
+				if (settings.calendar_type === 'days') {
+					settings.moment = settings.moment.add(1, 'months')
+					render(settings.moment.clone())
+					bind_selectors()
+					bind_navigation(true)
+					bind_shortcuts()
+				}
+				else if (settings.calendar_type === 'months' && year_select) {
+					let year = parseInt(year_select.options[year_select.selectedIndex].value)
+					year += 1
+					let temp = settings.year_dropdown_after.year()
+					if (year > temp) {
+						year -= 1
+						return
+					}
+					year_select.value = year
+					change_year(year)
+					highlight_current_month(year)
+				}
 				change_selected()
 			})
 			click(back_button, function() {
-				settings.moment = settings.moment.subtract(1, 'months')
-				render(settings.moment.clone())
-				bind_selectors()
-				bind_navigation(true)
-				bind_shortcuts()
+				if (settings.calendar_type === 'days') {
+					settings.moment = settings.moment.subtract(1, 'months')
+					render(settings.moment.clone())
+					bind_selectors()
+					bind_navigation(true)
+					bind_shortcuts()
+				}
+				else if (settings.calendar_type === 'months' && year_select) {
+					let year = parseInt(year_select.options[year_select.selectedIndex].value)
+					year -= 1
+					let temp = settings.year_dropdown_before.year()
+					if (year < temp) {
+						year += 1
+						return
+					}
+					year_select.value = year
+					change_year(year)
+					highlight_current_month(year)
+				}
 				change_selected()
 			})
+			if (year_select && settings.calendar_type === 'months') {
+				add_event(year_select, 'change', function() {
+					let year = year_select.options[year_select.selectedIndex].value
+					change_year(year)
+					change_selected()
+					highlight_current_month(year)
+				})
+			}
 			if (settings.handle) {
 				if (!handle_bound) {
 					settings.handle.style.cursor = 'pointer'
@@ -392,117 +451,131 @@
 			let this_week = shortcut_div.getElementsByClassName(settings.class_this_week).item(0)
 			let last_week = shortcut_div.getElementsByClassName(settings.class_last_week).item(0)
 			let clear = shortcut_div.getElementsByClassName(settings.class_clear).item(0)
-			click(deselect_weekends, function() {
-				for (let key of Array.from(settings.selected_dates.keys()).reverse()) {
-					let date = settings.selected_dates[key].date
-					if (date.day() === 0 || date.day() === 6) {
-						let element = settings.parent.querySelector('[data-date="' + date.format(settings.date_format) + '"]')
-						remove_date(date, element)
+			if (deselect_weekends) {
+				click(deselect_weekends, function() {
+					for (let key of Array.from(settings.selected_dates.keys()).reverse()) {
+						let date = settings.selected_dates[key].date
+						if (date.day() === 0 || date.day() === 6) {
+							let element = settings.parent.querySelector('[data-date="' + date.format(settings.date_format) + '"]')
+							remove_date(date, element)
+						}
 					}
-				}
-				settings.select_event()
-			})
-			click(mtd, function(e) {
-				let today = moment()
-				settings.moment = today.clone()
-				let start = moment().startOf('month')
-				if (!(e.ctrlKey && settings.ctrl_click)) {
+					settings.select_event()
+				})
+			}
+			if (mtd) {
+				click(mtd, function(e) {
+					let today = moment()
+					settings.moment = today.clone()
+					let start = moment().startOf('month')
+					if (!(e.ctrlKey && settings.ctrl_click)) {
+						settings.selected_dates = clear_selection()
+					}
+					while (start.isSameOrBefore(today, 'days')) {
+						add_date(start.clone())
+						start.add(1, 'days')
+					}
+					render(today)
+					bind_selectors()
+					bind_navigation(true)
+					bind_shortcuts()
+					change_selected()
+					settings.select_event()
+				})
+			}
+			if (today_button) {
+				click(today_button, function(e) {
+					let today = moment()
+					settings.moment = today.clone()
+					if (e.shiftKey && settings.shift_click) {
+						let element = settings.parent.querySelector('[data-date="' + today.format(settings.date_format) + '"]')
+						shift_click(element, null, today)
+					}
+					else if (!(e.ctrlKey && settings.ctrl_click)) {
+						settings.selected_dates = clear_selection()
+						add_date(today.clone())
+					}
+					else {
+						add_date(today.clone())
+					}
+					render(today)
+					bind_selectors()
+					bind_navigation(true)
+					bind_shortcuts()
+					change_selected()
+					settings.select_event()
+				})
+			}
+			if (yesterday) {
+				click(yesterday, function(e) {
+					let yest = moment().subtract(1, 'days')
+					settings.moment = yest.clone()
+					if (e.shiftKey && settings.shift_click) {
+						let element = settings.parent.querySelector('[data-date="' + yest.format(settings.date_format) + '"]')
+						shift_click(element, null, yest)
+					}
+					else if (!(e.ctrlKey && settings.ctrl_click)) {
+						settings.selected_dates = clear_selection()
+						add_date(yest.clone())
+					}
+					else {
+						add_date(yest.clone())
+					}
+					render(yest)
+					bind_selectors()
+					bind_navigation(true)
+					bind_shortcuts()
+					change_selected()
+					settings.select_event()
+				})
+			}
+			if (this_week) {
+				click(this_week, function(e) {
+					let week_start = moment().startOf('week')
+					settings.moment = week_start.clone()
+					let week_end = moment().endOf('week')
+					if (!(e.ctrlKey && settings.ctrl_click)) {
+						settings.selected_dates = clear_selection()
+					}
+					while (week_start.isSameOrBefore(week_end, 'days')) {
+						add_date(week_start.clone())
+						week_start.add(1, 'days')
+					}
+					render(moment())
+					bind_selectors()
+					bind_navigation(true)
+					bind_shortcuts()
+					change_selected()
+					settings.select_event()
+				})
+			}
+			if (last_week) {
+				click(last_week, function(e) {
+					let week_start = moment().subtract(1, 'week').startOf('week')
+					settings.moment = week_start.clone()
+					let week_end = moment().subtract(1, 'week').endOf('week')
+					if (!(e.ctrlKey && settings.ctrl_click)) {
+						settings.selected_dates = clear_selection()
+					}
+					while (week_start.isSameOrBefore(week_end, 'days')) {
+						add_date(week_start.clone())
+						week_start.add(1, 'days')
+					}
+					render(week_start.startOf('week'))
+					bind_selectors()
+					bind_navigation(true)
+					bind_shortcuts()
+					change_selected()
+					settings.select_event()
+				})
+			}
+			if (clear) {
+				click(clear, function() {
 					settings.selected_dates = clear_selection()
-				}
-				while (start.isSameOrBefore(today, 'days')) {
-					add_date(start.clone())
-					start.add(1, 'days')
-				}
-				render(today)
-				bind_selectors()
-				bind_navigation(true)
-				bind_shortcuts()
-				change_selected()
-				settings.select_event()
-			})
-			click(today_button, function(e) {
-				let today = moment()
-				settings.moment = today.clone()
-				if (e.shiftKey && settings.shift_click) {
-					let element = settings.parent.querySelector('[data-date="' + today.format(settings.date_format) + '"]')
-					shift_click(element, null, today)
-				}
-				else if (!(e.ctrlKey && settings.ctrl_click)) {
-					settings.selected_dates = clear_selection()
-					add_date(today.clone())
-				}
-				else {
-					add_date(today.clone())
-				}
-				render(today)
-				bind_selectors()
-				bind_navigation(true)
-				bind_shortcuts()
-				change_selected()
-				settings.select_event()
-			})
-			click(yesterday, function(e) {
-				let yest = moment().subtract(1, 'days')
-				settings.moment = yest.clone()
-				if (e.shiftKey && settings.shift_click) {
-					let element = settings.parent.querySelector('[data-date="' + yest.format(settings.date_format) + '"]')
-					shift_click(element, null, yest)
-				}
-				else if (!(e.ctrlKey && settings.ctrl_click)) {
-					settings.selected_dates = clear_selection()
-					add_date(yest.clone())
-				}
-				else {
-					add_date(yest.clone())
-				}
-				render(yest)
-				bind_selectors()
-				bind_navigation(true)
-				bind_shortcuts()
-				change_selected()
-				settings.select_event()
-			})
-			click(this_week, function(e) {
-				let week_start = moment().startOf('week')
-				settings.moment = week_start.clone()
-				let week_end = moment().endOf('week')
-				if (!(e.ctrlKey && settings.ctrl_click)) {
-					settings.selected_dates = clear_selection()
-				}
-				while (week_start.isSameOrBefore(week_end, 'days')) {
-					add_date(week_start.clone())
-					week_start.add(1, 'days')
-				}
-				render(moment())
-				bind_selectors()
-				bind_navigation(true)
-				bind_shortcuts()
-				change_selected()
-				settings.select_event()
-			})
-			click(last_week, function(e) {
-				let week_start = moment().subtract(1, 'week').startOf('week')
-				settings.moment = week_start.clone()
-				let week_end = moment().subtract(1, 'week').endOf('week')
-				if (!(e.ctrlKey && settings.ctrl_click)) {
-					settings.selected_dates = clear_selection()
-				}
-				while (week_start.isSameOrBefore(week_end, 'days')) {
-					add_date(week_start.clone())
-					week_start.add(1, 'days')
-				}
-				render(week_start.startOf('week'))
-				bind_selectors()
-				bind_navigation(true)
-				bind_shortcuts()
-				change_selected()
-				settings.select_event()
-			})
-			click(clear, function() {
-				settings.selected_dates = clear_selection()
-				change_selected()
-				settings.select_event()
-			})
+					change_selected()
+					settings.select_event()
+				})
+			}
 			for (let shortcut of settings.custom_shortcuts) {
 				let class_name = shortcut.class
 				append_to_element(shortcut_div, tag('span', shortcut.label, cls(class_name)))
@@ -522,6 +595,28 @@
 					change_selected()
 					settings.select_event()
 				})
+			}
+		}
+
+		function change_year(year) {
+			let tds = settings.parent.getElementsByClassName(settings.class_active)
+			for (let td of tds) {
+				data(td, 'date', moment(data(td, 'date'), settings.date_format).year(year).format(settings.date_format))
+			}
+		}
+
+		function highlight_current_month(year) {
+			if (year === settings.today.year()) {
+				let element = settings.parent.querySelector('[data-date="' + settings.today.clone().startOf('month').format(settings.date_format) + '"] div')
+				if (element) {
+					add_class(element, settings.class_today_highlight)
+				}
+			}
+			else {
+				let element = settings.parent.getElementsByClassName(settings.class_today_highlight).item(0)
+				if (element) {
+					remove_class(element, settings.class_today_highlight)
+				}
 			}
 		}
 
@@ -550,11 +645,11 @@
 					later_date = this_date
 					earlier_date = last_date
 				}
-				let diff = later_date.diff(earlier_date, 'days')
+				let diff = later_date.diff(earlier_date, settings.calendar_type)
 				for (let x = 0; x <= diff; x++) {
 					let element = settings.parent.querySelector('[data-date="' + earlier_date.format(settings.date_format) + '"]')
 					add_date(earlier_date.clone(), element)
-					earlier_date.add(1, 'days')
+					earlier_date.add(1, settings.calendar_type)
 				}
 			}
 			else {
@@ -801,333 +896,333 @@
 	return Era
 }))
 
-(function() {
-	let yesterday = new Date()
-	yesterday.setDate(yesterday.getDate() - 1)
-	$.each($('#monthTable').find('td'), function() {
-		$(this).disableSelection()
-	})
-	$.each($('#quarterTable').find('td'), function() {
-		$(this).disableSelection()
-	})
-	let selectedMonths
-	let selectedQuarters
-
-	$('#monthView').unbind('click').click(function() {
-		$('#mtdLabel').show()
-		$('#date_handle').hide()
-		$('.selectedMonth').removeClass('selectedMonth')
-		selectedMonths = [{
-			date: (zeroPad(yesterday.getMonth() + 1)) + '-' + yesterday.getFullYear(),
-			lastClicked: false
-		}]
-		$('[data-month="' + zeroPad(yesterday.getMonth() + 1) + '"]').addClass('selectedMonth')
-		$('#dates_output').val(selectedMonths[0].date)
-		$('#yearSelect option[value="' + yesterday.getFullYear() + '"]').prop('selected', true)
-		$('.dateViewSelected').removeClass('dateViewSelected')
-		$('#monthView').addClass('dateViewSelected')
-		$('#dateGroup').hide()
-		$('#monthGroup').show()
-		$('#quarterGroup').hide()
-		$('#viewSelector').text('View: Months')
-		$('#prevYear').unbind('click').click(function() {
-			if (!$('#yearSelect option:selected').is(':first-child')) {
-				$('#yearSelect option:selected').removeAttr('selected').prev('option').prop('selected', true)
-				changeSelected('month')
-			}
-		}).disableSelection()
-		$('#nextYear').unbind('click').click(function() {
-			if (!$('#yearSelect option:selected').is(':last-child')) {
-				$('#yearSelect option:selected').removeAttr('selected').next('option').prop('selected', true)
-				changeSelected('month')
-			}
-		}).disableSelection()
-		$('#monthTable td').unbind('click').click(function(e) {
-			if (e.ctrlKey && !$('#monthView').hasClass('noCtrl')) { //Control Key Held
-				if ($(this).hasClass('selectedMonth')) { //clicking an element already selected
-					removeMonth($(this))
-				}
-				else { //clicking an element not yet selected
-					addMonth($(this).data('month'), $('#yearSelect option:selected').text(), $(this))
-				}
-			}
-			else if (e.shiftKey && !$('#monthView').hasClass('noShift')) { //Shift Key Held
-				let lastClicked = getValueIndex(selectedMonths, 'lastClicked', true)
-				if (lastClicked > -1) { //a previous element has already been clicked
-					let lastDate = selectedMonths[lastClicked].date.split('-')
-					let thisDate = [$(this).data('month'), $('#yearSelect option:selected').text()]
-					clearSelection()
-					let earlierDate
-					let laterDate
-					if (new Date(lastDate[1], lastDate[0]) > new Date(thisDate[1], thisDate[0])) {
-						earlierDate = new Date(thisDate[1], thisDate[0] - 1)
-						laterDate = new Date(lastDate[1], lastDate[0] - 1)
-					}
-					else {
-						laterDate = new Date(thisDate[1], thisDate[0] - 1)
-						earlierDate = new Date(lastDate[1], lastDate[0] - 1)
-					}
-					let diff = monthDiff(earlierDate, laterDate)
-					for (let x = 0; x <= diff + 1; x++) {
-						let nextMonth = earlierDate.getMonth() + 1
-						nextMonth = zeroPad(nextMonth)
-						if (earlierDate.getFullYear() + '' === $('#yearSelect option:selected').text()) {
-							addMonth(nextMonth, earlierDate.getFullYear(), $('[data-month="' + nextMonth + '"]'))
-						}
-						else {
-							addMonth(nextMonth, earlierDate.getFullYear())
-						}
-						earlierDate.setMonth(parseInt(nextMonth, 10))
-					}
-				}
-				else { //no previous last month clicked on
-					addMonth($(this).data('month'), $('#yearSelect option:selected').text(), $(this))
-				}
-			}
-			else { //Not Shift Key nor Control Key Held
-				clearSelection()
-				if (!$(this).hasClass('selectedMonth')) { //clicking an element that isn't already selected
-					addMonth($(this).data('month'), $('#yearSelect option:selected').text(), $(this))
-				}
-			}
-			$('#dates_output').val('')
-			let dates_output = ''
-			selectedMonths.sort(function(x, y) {
-				let date1 = x.date.split('-')
-				let date2 = y.date.split('-')
-				if (new Date(date1[1], date1[0]) < new Date(date2[1], date2[0])) {
-					return -1
-				}
-				if (new Date(date1[1], date1[0]) > new Date(date2[1], date2[0])) {
-					return 1
-				}
-				return 0
-			})
-			for (let y = 0; y < selectedMonths.length; y++) {
-				dates_output += selectedMonths[y].date + ', '
-			}
-			$('#dates_output').val(dates_output.slice(0, -2))
-		})
-
-		function addMonth(month, year, element) {
-			if (element) {
-				element.addClass('selectedMonth')
-			}
-			let dateString = month + '-' + year
-			for (let i = 0; i < selectedMonths.length; i++) {
-				selectedMonths[i].lastClicked = false
-			}
-			selectedMonths.push({date: dateString, lastClicked: true})
-			return dateString
-		}
-
-		function removeMonth(element) {
-			element.removeClass('selectedMonth')
-			selectedMonths.splice(getValueIndex(selectedMonths, 'date', element.data('month')), 1)
-		}
-
-		function monthDiff(d1, d2) {
-			let months
-			months = (d2.getFullYear() - d1.getFullYear()) * 12
-			months -= d1.getMonth() + 1
-			months += d2.getMonth()
-			return months <= 0 ? 0 : months
-		}
-
-		$('#yearSelect').change(function() {
-			changeSelected('month')
-		})
-	}).disableSelection()
-
-	$('#dayView').unbind('click').click(function() {
-		$('#mtdLabel').hide()
-		$('#viewSelector').text('View: Days')
-		$('#monthGroup').hide()
-		$('#quarterGroup').hide()
-		$('#date_handle').show()
-		era.set_dates([moment().subtract(1, 'days')])
-		$('.dateViewSelected').removeClass('dateViewSelected')
-		$('#dayView').addClass('dateViewSelected')
-	}).disableSelection()
-
-	$('#quarterView').unbind('click').click(function() {
-		$('.selectedQuarter').removeClass('selectedQuarter')
-		selectedQuarters = [{
-			date: ("Q" + yesterday.getQuarter()) + ' ' + yesterday.getFullYear(),
-			lastClicked: false
-		}]
-		$('[data-quarter="' + yesterday.getQuarter() + '"]').addClass('selectedQuarter')
-		$('#dates_output').val(selectedQuarters[0].date)
-		$('#quarterYearSelect option[value="' + yesterday.getFullYear() + '"]').prop('selected', true)
-		$('#viewSelector').text('View: Quarters')
-		$('#monthGroup').hide()
-		$('#quarterGroup').show()
-		$('#date_handle').hide()
-		$('.dateViewSelected').removeClass('dateViewSelected')
-		$('#quarterView').addClass('dateViewSelected')
-		$('#prevQuarterYear').unbind('click').click(function() {
-			if (!$('#quarterYearSelect option:selected').is(':first-child')) {
-				$('#quarterYearSelect option:selected').removeAttr('selected').prev('option').prop('selected', true)
-				changeSelected('quarter')
-			}
-		}).disableSelection()
-		$('#nextQuarterYear').unbind('click').click(function() {
-			if (!$('#quarterYearSelect option:selected').is(':last-child')) {
-				$('#quarterYearSelect option:selected').removeAttr('selected').next('option').prop('selected', true)
-				changeSelected('quarter')
-			}
-		}).disableSelection()
-		$('#quarterTable td').unbind('click').click(function(e) {
-			if (e.ctrlKey && !$('#quarterView').hasClass('noCtrl')) { //Control Key Held
-				if ($(this).hasClass('selectedQuarter')) { //clicking an element already selected
-					removeQuarter($(this))
-				}
-				else { //clicking an element not yet selected
-					addQuarter($(this).data('quarter'), $('#quarterYearSelect option:selected').text(), $(this))
-				}
-			}
-			else if (e.shiftKey && !$('#quarterView').hasClass('noShift')) { //Shift Key Held
-				let lastClicked = getValueIndex(selectedQuarters, 'lastClicked', true)
-				if (lastClicked > -1) { //a previous element has already been clicked
-					let lastDate = selectedQuarters[lastClicked].date.replace('Q', '').split(' ')
-					let thisDate = [$(this).data('quarter') + '', $('#quarterYearSelect option:selected').text()]
-					clearSelection()
-					let earlierDate
-					let laterDate
-					if (new Date(lastDate[1], lastDate[0] * 3 - 1) > new Date(thisDate[1], thisDate[0] * 3 - 1)) {
-						earlierDate = new Date(thisDate[1], thisDate[0] * 3 - 1)
-						laterDate = new Date(lastDate[1], lastDate[0] * 3 - 1)
-					}
-					else {
-						laterDate = new Date(thisDate[1], thisDate[0] * 3 - 1)
-						earlierDate = new Date(lastDate[1], lastDate[0] * 3 - 1)
-					}
-					let diff = quarterDiff(earlierDate, laterDate)
-					for (let x = 0; x <= diff; x++) {
-						let nextQuarter = earlierDate.getQuarter() + 1
-						let thisQuarter = earlierDate.getQuarter()
-						if (earlierDate.getFullYear() + '' === $('#quarterYearSelect option:selected').text()) {
-							addQuarter(thisQuarter, earlierDate.getFullYear(), $('[data-quarter="' + thisQuarter + '"]'))
-						}
-						else {
-							addQuarter(thisQuarter, earlierDate.getFullYear())
-						}
-						earlierDate.setQuarter(parseInt(nextQuarter, 10))
-					}
-				}
-				else { //no previous last quarter clicked on
-					addQuarter($(this).data('quarter'), $('#quarterYearSelect option:selected').text(), $(this))
-				}
-			}
-			else { //Not Shift Key nor Control Key Held
-				clearSelection()
-				if (!$(this).hasClass('selectedQuarter')) { //clicking an element that isn't already selected
-					addQuarter($(this).data('quarter'), $('#quarterYearSelect option:selected').text(), $(this))
-				}
-			}
-			$('#dates_output').val('')
-			let dates_output = ''
-			selectedQuarters.sort(function(x, y) {
-				let date1 = x.date.split('-')
-				let date2 = y.date.split('-')
-				if (new Date(date1[1], date1[0]) < new Date(date2[1], date2[0])) {
-					return -1
-				}
-				if (new Date(date1[1], date1[0]) > new Date(date2[1], date2[0])) {
-					return 1
-				}
-				return 0
-			})
-			for (let y = 0; y < selectedQuarters.length; y++) {
-				dates_output += selectedQuarters[y].date + ', '
-			}
-			$('#dates_output').val(dates_output.slice(0, -2))
-
-			function addQuarter(quarter, year, element) {
-				if (element) {
-					element.addClass('selectedQuarter')
-				}
-				let dateString = 'Q' + quarter + ' ' + year
-				for (let i = 0; i < selectedQuarters.length; i++) {
-					selectedQuarters[i].lastClicked = false
-				}
-				selectedQuarters.push({date: dateString, lastClicked: true})
-				return dateString
-			}
-
-			function removeQuarter(element) {
-				element.removeClass('selectedQuarter')
-				selectedQuarters.splice(getValueIndex(selectedQuarters, 'date', element.data('quarter')), 1)
-			}
-
-			function quarterDiff(d1, d2) {
-				let quarters
-				quarters = (d2.getFullYear() - d1.getFullYear()) * 4
-				quarters -= d1.getQuarter()
-				quarters += d2.getQuarter()
-				return quarters <= 0 ? 0 : quarters
-			}
-
-			$('#quarterYearSelect').change(function() {
-				changeSelected('quarter')
-			})
-		})
-	}).disableSelection()
-
-	function changeSelected(type) {
-		let x = 0
-		let thisDate
-		if (type === 'month') {
-			$('.selectedMonth').removeClass('selectedMonth')
-			for (x = 0; x < selectedMonths.length; x++) {
-				thisDate = selectedMonths[x].date.split('-')
-				if (thisDate[1] === $('#yearSelect option:selected').text()) {
-					$('[data-month="' + thisDate[0] + '"]').addClass('selectedMonth')
-				}
-			}
-		}
-		else if (type === 'quarter') {
-			$('.selectedQuarter').removeClass('selectedQuarter')
-			for (x = 0; x < selectedQuarters.length; x++) {
-				thisDate = selectedQuarters[x].date.replace('Q', '').split(' ')
-				if (thisDate[1] === $('#quarterYearSelect option:selected').text()) {
-					$('[data-quarter="' + thisDate[0] + '"]').addClass('selectedQuarter')
-				}
-			}
-		}
-	}
-
-	function getValueIndex(arr, property, value) {
-		for (let i = 0; i < arr.length; i++) {
-			if (arr[i][property] === value) return i
-		}
-		return null
-	}
-
-	$('#tableClear').unbind('click').click(function() {
-		clearFields()
-		clearSelection()
-	}).disableSelection()
-
-	$('#filterClear').unbind('click').click(function() {
-		let filters = [], $t = $(this), col = $t.data('filter-column')
-		filters[col] = $t.data('filter-text') || $t.text()
-		return false
-	}).disableSelection()
-
-	function clearSelection() {
-		$('.selectedMonth').removeClass('selectedMonth')
-		selectedMonths = []
-		$('.selectedQuarter').removeClass('selectedQuarter')
-		selectedQuarters = []
-	}
-
-	function clearFields() {
-		$('.selectedOption').removeClass('selectedOption')
-		$('.highlightedOption').removeClass('highlightedOption')
-		$('#dates_output').val('')
-		$('#headerFields').html('')
-		$('#headerSps').html('')
-		$('#headerAgents').val('')
-	}
-})
+// (function() {
+// 	let yesterday = new Date()
+// 	yesterday.setDate(yesterday.getDate() - 1)
+// 	$.each($('#monthTable').find('td'), function() {
+// 		$(this).disableSelection()
+// 	})
+// 	$.each($('#quarterTable').find('td'), function() {
+// 		$(this).disableSelection()
+// 	})
+// 	let selectedMonths
+// 	let selectedQuarters
+//
+// 	$('#monthView').unbind('click').click(function() {
+// 		$('#mtdLabel').show()
+// 		$('#date_handle').hide()
+// 		$('.selectedMonth').removeClass('selectedMonth')
+// 		selectedMonths = [{
+// 			date: (zeroPad(yesterday.getMonth() + 1)) + '-' + yesterday.getFullYear(),
+// 			lastClicked: false
+// 		}]
+// 		$('[data-month="' + zeroPad(yesterday.getMonth() + 1) + '"]').addClass('selectedMonth')
+// 		$('#dates_output').val(selectedMonths[0].date)
+// 		$('#yearSelect option[value="' + yesterday.getFullYear() + '"]').prop('selected', true)
+// 		$('.dateViewSelected').removeClass('dateViewSelected')
+// 		$('#monthView').addClass('dateViewSelected')
+// 		$('#dateGroup').hide()
+// 		$('#monthGroup').show()
+// 		$('#quarterGroup').hide()
+// 		$('#viewSelector').text('View: Months')
+// 		$('#prevYear').unbind('click').click(function() {
+// 			if (!$('#yearSelect option:selected').is(':first-child')) {
+// 				$('#yearSelect option:selected').removeAttr('selected').prev('option').prop('selected', true)
+// 				changeSelected('month')
+// 			}
+// 		}).disableSelection()
+// 		$('#nextYear').unbind('click').click(function() {
+// 			if (!$('#yearSelect option:selected').is(':last-child')) {
+// 				$('#yearSelect option:selected').removeAttr('selected').next('option').prop('selected', true)
+// 				changeSelected('month')
+// 			}
+// 		}).disableSelection()
+// 		$('#monthTable td').unbind('click').click(function(e) {
+// 			if (e.ctrlKey && !$('#monthView').hasClass('noCtrl')) { //Control Key Held
+// 				if ($(this).hasClass('selectedMonth')) { //clicking an element already selected
+// 					removeMonth($(this))
+// 				}
+// 				else { //clicking an element not yet selected
+// 					addMonth($(this).data('month'), $('#yearSelect option:selected').text(), $(this))
+// 				}
+// 			}
+// 			else if (e.shiftKey && !$('#monthView').hasClass('noShift')) { //Shift Key Held
+// 				let lastClicked = getValueIndex(selectedMonths, 'lastClicked', true)
+// 				if (lastClicked > -1) { //a previous element has already been clicked
+// 					let lastDate = selectedMonths[lastClicked].date.split('-')
+// 					let thisDate = [$(this).data('month'), $('#yearSelect option:selected').text()]
+// 					clearSelection()
+// 					let earlierDate
+// 					let laterDate
+// 					if (new Date(lastDate[1], lastDate[0]) > new Date(thisDate[1], thisDate[0])) {
+// 						earlierDate = new Date(thisDate[1], thisDate[0] - 1)
+// 						laterDate = new Date(lastDate[1], lastDate[0] - 1)
+// 					}
+// 					else {
+// 						laterDate = new Date(thisDate[1], thisDate[0] - 1)
+// 						earlierDate = new Date(lastDate[1], lastDate[0] - 1)
+// 					}
+// 					let diff = monthDiff(earlierDate, laterDate)
+// 					for (let x = 0; x <= diff + 1; x++) {
+// 						let nextMonth = earlierDate.getMonth() + 1
+// 						nextMonth = zeroPad(nextMonth)
+// 						if (earlierDate.getFullYear() + '' === $('#yearSelect option:selected').text()) {
+// 							addMonth(nextMonth, earlierDate.getFullYear(), $('[data-month="' + nextMonth + '"]'))
+// 						}
+// 						else {
+// 							addMonth(nextMonth, earlierDate.getFullYear())
+// 						}
+// 						earlierDate.setMonth(parseInt(nextMonth, 10))
+// 					}
+// 				}
+// 				else { //no previous last month clicked on
+// 					addMonth($(this).data('month'), $('#yearSelect option:selected').text(), $(this))
+// 				}
+// 			}
+// 			else { //Not Shift Key nor Control Key Held
+// 				clearSelection()
+// 				if (!$(this).hasClass('selectedMonth')) { //clicking an element that isn't already selected
+// 					addMonth($(this).data('month'), $('#yearSelect option:selected').text(), $(this))
+// 				}
+// 			}
+// 			$('#dates_output').val('')
+// 			let dates_output = ''
+// 			selectedMonths.sort(function(x, y) {
+// 				let date1 = x.date.split('-')
+// 				let date2 = y.date.split('-')
+// 				if (new Date(date1[1], date1[0]) < new Date(date2[1], date2[0])) {
+// 					return -1
+// 				}
+// 				if (new Date(date1[1], date1[0]) > new Date(date2[1], date2[0])) {
+// 					return 1
+// 				}
+// 				return 0
+// 			})
+// 			for (let y = 0; y < selectedMonths.length; y++) {
+// 				dates_output += selectedMonths[y].date + ', '
+// 			}
+// 			$('#dates_output').val(dates_output.slice(0, -2))
+// 		})
+//
+// 		function addMonth(month, year, element) {
+// 			if (element) {
+// 				element.addClass('selectedMonth')
+// 			}
+// 			let dateString = month + '-' + year
+// 			for (let i = 0; i < selectedMonths.length; i++) {
+// 				selectedMonths[i].lastClicked = false
+// 			}
+// 			selectedMonths.push({date: dateString, lastClicked: true})
+// 			return dateString
+// 		}
+//
+// 		function removeMonth(element) {
+// 			element.removeClass('selectedMonth')
+// 			selectedMonths.splice(getValueIndex(selectedMonths, 'date', element.data('month')), 1)
+// 		}
+//
+// 		function monthDiff(d1, d2) {
+// 			let months
+// 			months = (d2.getFullYear() - d1.getFullYear()) * 12
+// 			months -= d1.getMonth() + 1
+// 			months += d2.getMonth()
+// 			return months <= 0 ? 0 : months
+// 		}
+//
+// 		$('#yearSelect').change(function() {
+// 			changeSelected('month')
+// 		})
+// 	}).disableSelection()
+//
+// 	$('#dayView').unbind('click').click(function() {
+// 		$('#mtdLabel').hide()
+// 		$('#viewSelector').text('View: Days')
+// 		$('#monthGroup').hide()
+// 		$('#quarterGroup').hide()
+// 		$('#date_handle').show()
+// 		era.set_dates([moment().subtract(1, 'days')])
+// 		$('.dateViewSelected').removeClass('dateViewSelected')
+// 		$('#dayView').addClass('dateViewSelected')
+// 	}).disableSelection()
+//
+// 	$('#quarterView').unbind('click').click(function() {
+// 		$('.selectedQuarter').removeClass('selectedQuarter')
+// 		selectedQuarters = [{
+// 			date: ("Q" + yesterday.getQuarter()) + ' ' + yesterday.getFullYear(),
+// 			lastClicked: false
+// 		}]
+// 		$('[data-quarter="' + yesterday.getQuarter() + '"]').addClass('selectedQuarter')
+// 		$('#dates_output').val(selectedQuarters[0].date)
+// 		$('#quarterYearSelect option[value="' + yesterday.getFullYear() + '"]').prop('selected', true)
+// 		$('#viewSelector').text('View: Quarters')
+// 		$('#monthGroup').hide()
+// 		$('#quarterGroup').show()
+// 		$('#date_handle').hide()
+// 		$('.dateViewSelected').removeClass('dateViewSelected')
+// 		$('#quarterView').addClass('dateViewSelected')
+// 		$('#prevQuarterYear').unbind('click').click(function() {
+// 			if (!$('#quarterYearSelect option:selected').is(':first-child')) {
+// 				$('#quarterYearSelect option:selected').removeAttr('selected').prev('option').prop('selected', true)
+// 				changeSelected('quarter')
+// 			}
+// 		}).disableSelection()
+// 		$('#nextQuarterYear').unbind('click').click(function() {
+// 			if (!$('#quarterYearSelect option:selected').is(':last-child')) {
+// 				$('#quarterYearSelect option:selected').removeAttr('selected').next('option').prop('selected', true)
+// 				changeSelected('quarter')
+// 			}
+// 		}).disableSelection()
+// 		$('#quarterTable td').unbind('click').click(function(e) {
+// 			if (e.ctrlKey && !$('#quarterView').hasClass('noCtrl')) { //Control Key Held
+// 				if ($(this).hasClass('selectedQuarter')) { //clicking an element already selected
+// 					removeQuarter($(this))
+// 				}
+// 				else { //clicking an element not yet selected
+// 					addQuarter($(this).data('quarter'), $('#quarterYearSelect option:selected').text(), $(this))
+// 				}
+// 			}
+// 			else if (e.shiftKey && !$('#quarterView').hasClass('noShift')) { //Shift Key Held
+// 				let lastClicked = getValueIndex(selectedQuarters, 'lastClicked', true)
+// 				if (lastClicked > -1) { //a previous element has already been clicked
+// 					let lastDate = selectedQuarters[lastClicked].date.replace('Q', '').split(' ')
+// 					let thisDate = [$(this).data('quarter') + '', $('#quarterYearSelect option:selected').text()]
+// 					clearSelection()
+// 					let earlierDate
+// 					let laterDate
+// 					if (new Date(lastDate[1], lastDate[0] * 3 - 1) > new Date(thisDate[1], thisDate[0] * 3 - 1)) {
+// 						earlierDate = new Date(thisDate[1], thisDate[0] * 3 - 1)
+// 						laterDate = new Date(lastDate[1], lastDate[0] * 3 - 1)
+// 					}
+// 					else {
+// 						laterDate = new Date(thisDate[1], thisDate[0] * 3 - 1)
+// 						earlierDate = new Date(lastDate[1], lastDate[0] * 3 - 1)
+// 					}
+// 					let diff = quarterDiff(earlierDate, laterDate)
+// 					for (let x = 0; x <= diff; x++) {
+// 						let nextQuarter = earlierDate.getQuarter() + 1
+// 						let thisQuarter = earlierDate.getQuarter()
+// 						if (earlierDate.getFullYear() + '' === $('#quarterYearSelect option:selected').text()) {
+// 							addQuarter(thisQuarter, earlierDate.getFullYear(), $('[data-quarter="' + thisQuarter + '"]'))
+// 						}
+// 						else {
+// 							addQuarter(thisQuarter, earlierDate.getFullYear())
+// 						}
+// 						earlierDate.setQuarter(parseInt(nextQuarter, 10))
+// 					}
+// 				}
+// 				else { //no previous last quarter clicked on
+// 					addQuarter($(this).data('quarter'), $('#quarterYearSelect option:selected').text(), $(this))
+// 				}
+// 			}
+// 			else { //Not Shift Key nor Control Key Held
+// 				clearSelection()
+// 				if (!$(this).hasClass('selectedQuarter')) { //clicking an element that isn't already selected
+// 					addQuarter($(this).data('quarter'), $('#quarterYearSelect option:selected').text(), $(this))
+// 				}
+// 			}
+// 			$('#dates_output').val('')
+// 			let dates_output = ''
+// 			selectedQuarters.sort(function(x, y) {
+// 				let date1 = x.date.split('-')
+// 				let date2 = y.date.split('-')
+// 				if (new Date(date1[1], date1[0]) < new Date(date2[1], date2[0])) {
+// 					return -1
+// 				}
+// 				if (new Date(date1[1], date1[0]) > new Date(date2[1], date2[0])) {
+// 					return 1
+// 				}
+// 				return 0
+// 			})
+// 			for (let y = 0; y < selectedQuarters.length; y++) {
+// 				dates_output += selectedQuarters[y].date + ', '
+// 			}
+// 			$('#dates_output').val(dates_output.slice(0, -2))
+//
+// 			function addQuarter(quarter, year, element) {
+// 				if (element) {
+// 					element.addClass('selectedQuarter')
+// 				}
+// 				let dateString = 'Q' + quarter + ' ' + year
+// 				for (let i = 0; i < selectedQuarters.length; i++) {
+// 					selectedQuarters[i].lastClicked = false
+// 				}
+// 				selectedQuarters.push({date: dateString, lastClicked: true})
+// 				return dateString
+// 			}
+//
+// 			function removeQuarter(element) {
+// 				element.removeClass('selectedQuarter')
+// 				selectedQuarters.splice(getValueIndex(selectedQuarters, 'date', element.data('quarter')), 1)
+// 			}
+//
+// 			function quarterDiff(d1, d2) {
+// 				let quarters
+// 				quarters = (d2.getFullYear() - d1.getFullYear()) * 4
+// 				quarters -= d1.getQuarter()
+// 				quarters += d2.getQuarter()
+// 				return quarters <= 0 ? 0 : quarters
+// 			}
+//
+// 			$('#quarterYearSelect').change(function() {
+// 				changeSelected('quarter')
+// 			})
+// 		})
+// 	}).disableSelection()
+//
+// 	function changeSelected(type) {
+// 		let x = 0
+// 		let thisDate
+// 		if (type === 'month') {
+// 			$('.selectedMonth').removeClass('selectedMonth')
+// 			for (x = 0; x < selectedMonths.length; x++) {
+// 				thisDate = selectedMonths[x].date.split('-')
+// 				if (thisDate[1] === $('#yearSelect option:selected').text()) {
+// 					$('[data-month="' + thisDate[0] + '"]').addClass('selectedMonth')
+// 				}
+// 			}
+// 		}
+// 		else if (type === 'quarter') {
+// 			$('.selectedQuarter').removeClass('selectedQuarter')
+// 			for (x = 0; x < selectedQuarters.length; x++) {
+// 				thisDate = selectedQuarters[x].date.replace('Q', '').split(' ')
+// 				if (thisDate[1] === $('#quarterYearSelect option:selected').text()) {
+// 					$('[data-quarter="' + thisDate[0] + '"]').addClass('selectedQuarter')
+// 				}
+// 			}
+// 		}
+// 	}
+//
+// 	function getValueIndex(arr, property, value) {
+// 		for (let i = 0; i < arr.length; i++) {
+// 			if (arr[i][property] === value) return i
+// 		}
+// 		return null
+// 	}
+//
+// 	$('#tableClear').unbind('click').click(function() {
+// 		clearFields()
+// 		clearSelection()
+// 	}).disableSelection()
+//
+// 	$('#filterClear').unbind('click').click(function() {
+// 		let filters = [], $t = $(this), col = $t.data('filter-column')
+// 		filters[col] = $t.data('filter-text') || $t.text()
+// 		return false
+// 	}).disableSelection()
+//
+// 	function clearSelection() {
+// 		$('.selectedMonth').removeClass('selectedMonth')
+// 		selectedMonths = []
+// 		$('.selectedQuarter').removeClass('selectedQuarter')
+// 		selectedQuarters = []
+// 	}
+//
+// 	function clearFields() {
+// 		$('.selectedOption').removeClass('selectedOption')
+// 		$('.highlightedOption').removeClass('highlightedOption')
+// 		$('#dates_output').val('')
+// 		$('#headerFields').html('')
+// 		$('#headerSps').html('')
+// 		$('#headerAgents').val('')
+// 	}
+// })

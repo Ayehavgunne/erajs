@@ -29,7 +29,7 @@
 	padding-right:4px;
 	border:1px solid #6D6D6D;
 }
-.erajs-era_div td:hover .erajs-days {
+.erajs-era_div td:hover .erajs-days, .erajs-era_div td:hover .erajs-month {
 	border-bottom:2px solid #004EFF;
 }
 .erajs-active, .erajs-back_arrow, .erajs-forward_arrow {
@@ -58,9 +58,6 @@
 .erajs-selected_date {
 	background-color:rgba(0, 23, 204, 0.42);
 }
-/*.erajs-shortcuts {*/
-	/*padding-top:10px;*/
-/*}*/
 .erajs-shortcuts_title {
 	font-size:.9em;
 	padding-bottom:3px;
@@ -81,4 +78,9 @@
 }
 .erajs-clear {
 	float:right !important;
+}
+.erajs-month {
+	padding:2px 4px;
+	height:25px;
+	line-height:22px;
 }
