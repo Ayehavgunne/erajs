@@ -1,12 +1,13 @@
-(function (global, factory) {
+(function(global, factory) {
 	global.Era = factory()
-}(window, function () {
+}(window, function() {
 	function Era(options) {
 		let settings = {}
 
 		function era(options) {
 			let m = moment()
 			let defaults = {
+				calendar_type: 'days',
 				number_of_months: 1,
 				date_format: 'YYYY-MM-DD',
 				ctrl_click: true,
@@ -18,6 +19,8 @@
 				vertical_offset: 0,
 				horizontal_offset: 0,
 				shortcuts: true,
+				year_dropdown_before: moment('2012', 'YYYY'),
+				year_dropdown_after: m,
 				on_select() {},
 				on_open() {},
 				on_close() {},
@@ -60,6 +63,7 @@
 				class_yesterday: 'erajs-yesterday',
 				class_this_week: 'erajs-this_week',
 				class_last_week: 'erajs-last_week',
+				class_current_month: 'erajs-current_month',
 				class_clear: 'erajs-clear',
 				back_button: '&#9664;',
 				forward_button: '&#9654;',
@@ -159,6 +163,18 @@
 		}
 
 		function render(m) {
+			if (settings.calendar_type === 'days') {
+				render_days(m)
+			}
+			else if (settings.calendar_type === 'months') {
+				render_months(m)
+			}
+			else if (settings.calendar_type === 'quarters') {
+				render_quarters(m)
+			}
+		}
+
+		function render_days(m) {
 			settings.element.innerHTML = ''
 			let today = moment()
 			let div = tag_factory('div')
@@ -237,6 +253,49 @@
 			settings.parent = settings.element.getElementsByClassName(settings.class_era).item(0)
 		}
 
+		function render_months(m) {
+			settings.element.innerHTML = ''
+			let today = moment()
+			let div = tag_factory('div')
+			let span = tag_factory('span')
+			let tr = tag_factory('tr')
+			let td = tag_factory('td')
+			let option = tag_factory('option')
+			let years = []
+			let month_names = moment.monthsShort()
+			while (settings.year_dropdown_before.isSameOrBefore(settings.year_dropdown_after)) {
+				if (settings.year_dropdown_before.year() === today.year()) {
+					years.push(option(settings.year_dropdown_before.format('YYYY'), {selected: null}))
+				}
+				else {
+					years.push(option(settings.year_dropdown_before.format('YYYY')))
+				}
+				settings.year_dropdown_before.add(1, 'years')
+			}
+			let header = tag('h4', [
+				span(settings.back_button, cls(settings.class_back_arrow)),
+				tag('label', 'Year', {for: 'year_select'}),
+				tag('select', years)
+			])
+			let table = tag('table', tag('tbody', [
+				tr([td(month_names[0]), td(month_names[1]), td(month_names[2])]),
+				tr([td(month_names[3]), td(month_names[4]), td(month_names[5])]),
+				tr([td(month_names[6]), td(month_names[7]), td(month_names[8])]),
+				tr([td(month_names[9]), td(month_names[10]), td(month_names[11])])
+			]))
+			let footer = div([
+				div('Shortcuts', cls(settings.class_shortcuts_title)),
+				span('Current Month', cls(settings.class_current_month)),
+				span('Clear', cls(settings.class_clear)),
+			], cls(settings.class_shortcuts))
+			let era_div = div([header, table, footer], cls(settings.class_era))
+			append_to_element(settings.element, era_div)
+		}
+
+		function render_quarters(m) {
+
+		}
+
 		function add_date(date, element = null) {
 			if (element) {
 				add_class(element, settings.class_selected)
@@ -257,7 +316,7 @@
 		function bind_selectors() {
 			let tds = settings.parent.querySelectorAll('.' + settings.class_active)
 			for (let td of tds) {
-				click(td, function (e) {
+				click(td, function(e) {
 					if (e.ctrlKey && settings.ctrl_click) {
 						ctrl_click(this)
 					}
@@ -277,7 +336,7 @@
 			let back_button = settings.parent.getElementsByClassName(settings.class_back_arrow).item(0)
 			let forward_button = settings.parent.getElementsByClassName(settings.class_forward_arrow).item(0)
 
-			click(forward_button, function () {
+			click(forward_button, function() {
 				settings.moment = settings.moment.add(1, 'months')
 				render(settings.moment.clone())
 				bind_selectors()
@@ -285,7 +344,7 @@
 				bind_shortcuts()
 				change_selected()
 			})
-			click(back_button, function () {
+			click(back_button, function() {
 				settings.moment = settings.moment.subtract(1, 'months')
 				render(settings.moment.clone())
 				bind_selectors()
@@ -298,14 +357,14 @@
 					settings.handle.style.cursor = 'pointer'
 					settings.parent.style.display = 'none'
 				}
-				click(settings.handle, function () {
+				click(settings.handle, function() {
 					settings.handle.style.cursor = ''
 					settings.parent.style.display = ''
 					move_to_bottom_of_handle()
 					if (!is_fully_on_screen()) {
 						move_on_screen()
 					}
-					click_outside_close(function () {
+					click_outside_close(function() {
 						settings.handle.style.cursor = 'pointer'
 						settings.close_event()
 					})
@@ -315,7 +374,7 @@
 				if (!is_fully_on_screen()) {
 					move_on_screen()
 				}
-				click_outside_close(function () {
+				click_outside_close(function() {
 					settings.handle.style.cursor = 'pointer'
 				})
 			}
@@ -333,7 +392,7 @@
 			let this_week = shortcut_div.getElementsByClassName(settings.class_this_week).item(0)
 			let last_week = shortcut_div.getElementsByClassName(settings.class_last_week).item(0)
 			let clear = shortcut_div.getElementsByClassName(settings.class_clear).item(0)
-			click(deselect_weekends, function () {
+			click(deselect_weekends, function() {
 				for (let key of Array.from(settings.selected_dates.keys()).reverse()) {
 					let date = settings.selected_dates[key].date
 					if (date.day() === 0 || date.day() === 6) {
@@ -343,7 +402,7 @@
 				}
 				settings.select_event()
 			})
-			click(mtd, function (e) {
+			click(mtd, function(e) {
 				let today = moment()
 				settings.moment = today.clone()
 				let start = moment().startOf('month')
@@ -361,7 +420,7 @@
 				change_selected()
 				settings.select_event()
 			})
-			click(today_button, function (e) {
+			click(today_button, function(e) {
 				let today = moment()
 				settings.moment = today.clone()
 				if (e.shiftKey && settings.shift_click) {
@@ -382,7 +441,7 @@
 				change_selected()
 				settings.select_event()
 			})
-			click(yesterday, function (e) {
+			click(yesterday, function(e) {
 				let yest = moment().subtract(1, 'days')
 				settings.moment = yest.clone()
 				if (e.shiftKey && settings.shift_click) {
@@ -403,7 +462,7 @@
 				change_selected()
 				settings.select_event()
 			})
-			click(this_week, function (e) {
+			click(this_week, function(e) {
 				let week_start = moment().startOf('week')
 				settings.moment = week_start.clone()
 				let week_end = moment().endOf('week')
@@ -421,7 +480,7 @@
 				change_selected()
 				settings.select_event()
 			})
-			click(last_week, function (e) {
+			click(last_week, function(e) {
 				let week_start = moment().subtract(1, 'week').startOf('week')
 				settings.moment = week_start.clone()
 				let week_end = moment().subtract(1, 'week').endOf('week')
@@ -439,7 +498,7 @@
 				change_selected()
 				settings.select_event()
 			})
-			click(clear, function () {
+			click(clear, function() {
 				settings.selected_dates = clear_selection()
 				change_selected()
 				settings.select_event()
@@ -448,7 +507,7 @@
 				let class_name = shortcut.class
 				append_to_element(shortcut_div, tag('span', shortcut.label, cls(class_name)))
 				let shortcut_element = shortcut_div.getElementsByClassName(class_name).item(0)
-				click(shortcut_element, function (e) {
+				click(shortcut_element, function(e) {
 					let dates = shortcut.callback(settings, e)
 					settings.selected_dates = clear_selection()
 					for (let date of dates) {
@@ -528,7 +587,7 @@
 			for (let date of settings.selected_dates) {
 				dates.push(date.date)
 			}
-			dates = dates.sort(function (a, b) {
+			dates = dates.sort(function(a, b) {
 				return a - b
 			})
 			return dates
@@ -600,7 +659,12 @@
 				inner_html = null
 			}
 			for (let key in attributes) {
-				html = html + ' ' + key + '="' + attributes[key] + '"'
+				if (attributes[key] === null) {
+					html = html + ' ' + key
+				}
+				else {
+					html = html + ' ' + key + '="' + attributes[key] + '"'
+				}
 			}
 			for (let key in data_attr) {
 				html = html + ' data-' + key + '="' + data_attr[key] + '"'
@@ -630,7 +694,7 @@
 		}
 
 		function tag_factory(tag) {
-			return function (inner_html, attributes = {}, data_attr = {}, self_closing = false) {
+			return function(inner_html, attributes = {}, data_attr = {}, self_closing = false) {
 				return _create_html(tag, inner_html, attributes, data_attr, self_closing)
 			}
 		}
@@ -844,6 +908,7 @@
 			}
 			$('#dates_output').val(dates_output.slice(0, -2))
 		})
+
 		function addMonth(month, year, element) {
 			if (element) {
 				element.addClass('selectedMonth')
@@ -977,6 +1042,7 @@
 				dates_output += selectedQuarters[y].date + ', '
 			}
 			$('#dates_output').val(dates_output.slice(0, -2))
+
 			function addQuarter(quarter, year, element) {
 				if (element) {
 					element.addClass('selectedQuarter')
